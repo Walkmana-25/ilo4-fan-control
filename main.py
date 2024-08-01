@@ -8,6 +8,16 @@ import json
 import re
 
 #------------------------------------------------
+# ilo4-fan-control
+# Fan control for HP ProLiant Gen8/Gen9 servers patched HPT iLo4 firmware
+# Before use this script, please install python3, sshpass and ilo4 unlock
+# ilo4 unlock repository: https://github.com/kendallgoto/ilo4_unlock
+
+# Repository: https://github.com/walkmana-25/ilo4-fan-control
+# Copyright (c) 2024 walkmana-25
+# License Apache-2.0 License. For details, see LICENSE file
+
+
 # Configuration
 
 # If your server has 2 CPU, set CPU2_INSTALLED to True
