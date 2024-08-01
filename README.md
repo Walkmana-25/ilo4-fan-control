@@ -27,7 +27,7 @@ ilo4 easy fan control software
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/yourusername/ilo4-fan-control.git
+    git clone https://github.com/walkmana-25/ilo4-fan-control.git
     cd ilo4-fan-control
     ```
 
@@ -49,7 +49,7 @@ ilo4 easy fan control software
 
 ## Contributing
 
-Bug reports and feature requests are welcome on the [Issues](https://github.com/yourusername/ilo4-fan-control/issues) page. Pull requests are also appreciated.
+Bug reports and feature requests are welcome on the [Issues](https://github.com/walkmana-25/ilo4-fan-control/issues) page. Pull requests are also appreciated.
 
 ## License
 
