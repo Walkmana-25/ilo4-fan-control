@@ -122,9 +122,15 @@ async def fan_control() -> None:
     await asyncio.gather(*task)
 
 async def main() -> None:
+    logging.info("Fan control start")
+    logging.info("by ilo4-fan-control")
 
     while True:
-        await fan_control()
+        try:
+            await fan_control()
+        except Exception as e:
+            logging.error(f"fan control failed: {e}")
+
         await asyncio.sleep(30)
 
 asyncio.run(main())
