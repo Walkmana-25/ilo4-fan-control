@@ -52,6 +52,11 @@ ILOIP = "iloip"
 
 # No verify SSL certificate
 ssl._create_default_https_context = ssl._create_unverified_context
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 async def set_fan(fan_id: int, temp: int) -> None:
     fan_speed = 0
