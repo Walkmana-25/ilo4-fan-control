@@ -5,8 +5,7 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/python3 /usr/local/ilo4-fan-control/main.py
 Restart=always
-User=nobody
-Group=nogroup
+User=root
 
 [Install]
 WantedBy=multi-user.target
