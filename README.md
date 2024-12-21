@@ -31,13 +31,19 @@ ilo4 easy fan control software
     cd ilo4-fan-control
     ```
 
+1. Copy the configuration file:
+
+    ```sh
+    cp example.config.py config.py
+    ```
+
 1. Change Setting:
 
     Please change the setting in main.py.
     For details, please read comments in main.py
 
     ```sh
-    vim main.py
+    vim config.py
     ```
 
 1. Run the following command to install the software:
