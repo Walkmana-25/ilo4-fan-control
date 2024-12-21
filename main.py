@@ -7,6 +7,16 @@ import ssl
 import json
 import re
 
+from config import (
+    CPU2_INSTALLED,
+    CPU1_FAN,
+    CPU2_FAN,
+    TEMP_THRESHOLD,
+    USER,
+    PASSWORD,
+    ILOIP
+)
+
 #------------------------------------------------
 # ilo4-fan-control
 # Fan control for HP ProLiant Gen8/Gen9 servers patched HPT iLo4 firmware
@@ -18,47 +28,24 @@ import re
 # License Apache-2.0 License. For details, see LICENSE file
 
 
-# Configuration
-
-# If your server has 2 CPU, set CPU2_INSTALLED to True
-CPU2_INSTALLED = False
-
-# Define fan ID for CPU1 and CPU2
-CPU1_FAN = [0, 1, 2, 3]
-CPU2_FAN = [4, 5, 6, 7]
-
-# Fan speed threshold
-# min: minimum temperature celsius
-# max: maximum temperature celsius
-# fan: fan speed (0-255)
-TEMP_THRESHOLD = [
-    {"min": 0, "max": 55, "fan": 50},
-    {"min": 55, "max": 60, "fan": 70},
-    {"min": 60, "max": 65, "fan": 100},
-    {"min": 65, "max": 70, "fan": 150},
-    {"min": 70, "max": 100, "fan": 255},
-]
-
-# iLO credential
-# USER: iLO username
-# PASSWORD: iLO password
-# ILOIP: iLO IP address
-# This user must be able to access ssh and ilo restful api
-USER = "sshuser"
-PASSWORD = "sshpass"
-ILOIP = "iloip"
-
-#------------------------------------------------
-
 # No verify SSL certificate
-ssl._create_default_https_context = ssl._create_unverified_context
+#ssl._create_default_https_context = ssl._create_unverified_context
+ssl.create_default_context = ssl._create_unverified_context
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-async def set_fan(fan_id: int, temp: int) -> None:
+ssh_option = [
+    "-o", "StrictHostKeyChecking=no",
+    "-o", "KexAlgorithms=+diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1",
+    "-o", "HostKeyAlgorithms=+ssh-rsa",
+    "-o", "Ciphers=+aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc"
+]
+
+
+def set_fan(fan_id: int, temp: int) -> list:
     fan_speed = 0
     for threshold in TEMP_THRESHOLD:
         if threshold["min"] <= temp < threshold["max"]:
@@ -67,20 +54,12 @@ async def set_fan(fan_id: int, temp: int) -> None:
 
     logging.info(f"Fan ID: {fan_id} speed: {fan_speed}")
 
-    ssh_option = [
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "KexAlgorithms=+diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1",
-        "-o", "HostKeyAlgorithms=+ssh-rsa",
-        "-o", "Ciphers=+aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc"
-    ]
-    ssh_cmd = ["sshpass", "-p", PASSWORD, "ssh", *ssh_option, f"{USER}@{ILOIP}"]
     fan_cmd = ["fan", "p", str(fan_id), "max", str(fan_speed)]
 
-    cmd = ssh_cmd + fan_cmd
 
     logging.info(f"Set fan id: {fan_id} speed: {fan_speed}")
-
-    await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.DEVNULL)
+    
+    return  fan_cmd
 
 async def get_ilo_temp() -> dict[str, int]:
     url = f"https://{ILOIP}/redfish/v1/Chassis/1/Thermal"
@@ -118,27 +97,58 @@ async def get_ilo_temp() -> dict[str, int]:
 
     return cpu_temp
 
+async def run_cmd_ssh(cmd: list[list[str]]) -> None:
+    ssh_cmd = ["sshpass", "-p", PASSWORD, "ssh", *ssh_option, f"{USER}@{ILOIP}"]
+
+    cmd = cmd.copy()
+    cmd += [["exit"]]
+
+    process = await asyncio.create_subprocess_exec(
+        *ssh_cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+
+    for c in cmd:
+        log = ""
+        while True:
+            o = await process.stdout.read(2)
+            log += o.decode("utf-8")
+            if not o:
+                break
+            if "</>hpiLO->" in log:
+                break
+
+        fan_command = " ".join(c)
+        process.stdin.write(f"{fan_command}\n".encode("utf-8"))
+        await process.stdin.drain()
+
+    await process.wait()
+    logging.info("Fan control done")
 
 async def fan_control() -> None:
     cpu_temp = await get_ilo_temp()
     logging.info(f"CPU Temp: {cpu_temp}")
 
-    task: list[asyncio.Task] = []
+    cmds = []
     
     for cpu_id, temp in cpu_temp.items():
         if temp > 0:
             if CPU2_INSTALLED and cpu_id == "CPU-2":
                 for fan_id in CPU2_FAN:
-                    task.append(asyncio.create_task(set_fan(fan_id, temp)))
+                    cmds.append(set_fan(fan_id, temp))
             else:
                 for fan_id in CPU1_FAN:
-                    task.append(asyncio.create_task(set_fan(fan_id, temp)))
+                    cmds.append(set_fan(fan_id, temp))
     
-    await asyncio.gather(*task)
+    await run_cmd_ssh(cmds)
+    
 
 async def main() -> None:
     logging.info("Fan control start")
     logging.info("by ilo4-fan-control")
+    logging.info("Target iLO4: %s", ILOIP)
 
     while True:
         try:
