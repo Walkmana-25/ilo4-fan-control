@@ -1,0 +1,16 @@
+[package]
+name = "ilo4-fan-control"
+version = "0.1.0"
+edition = "2021"
+description = "HP iLO4サーバー用ファン制御ユーティリティ"
+authors = ["Your Name <your.email@example.com>"]
+
+[[bin]]
+name = "fctrl"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.10"
