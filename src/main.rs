@@ -3,6 +3,8 @@ use clap::{Parser, Subcommand};
 use log::{info, error};
 use anyhow::{Result, Context};
 
+mod ssh;
+
 /// HP iLO4サーバー用ファン制御ユーティリティ
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
