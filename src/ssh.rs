@@ -1,12 +1,12 @@
 use anyhow::{Result, Context};
 use std::net::TcpStream;
+use std::io::Read;
 
 pub struct SshClient {
     host: String,
     user: String,
     password: String,
     session: Option<ssh2::Session>,
-    channel: Option<ssh2::Channel>,
 }
 
 impl SshClient {
@@ -17,7 +17,6 @@ impl SshClient {
             user,
             password,
             session: None,
-            channel: None
         }
     }
 
@@ -34,10 +33,24 @@ impl SshClient {
         
         session.userauth_password(&self.user, &self.password)?;
         
-        self.channel = Some(session.channel_session()?);
         
         Ok(())
         
+    }
+    
+    pub fn exec(&mut self, commands: Vec<String>) -> Result<Vec<String>> {
+        
+        let mut result = Vec::new();
+
+        for command in commands {
+            let mut channel = self.session.as_mut().unwrap().channel_session()?;
+            channel.exec(&command)?;
+            
+            let mut s = String::new();
+            channel.read_to_string(&mut s)?;
+            result.push(s);
+        }
+        Ok(result)
     }
     
 }
@@ -45,7 +58,6 @@ impl SshClient {
 #[cfg(test)]
 mod test {
     #[test]
-    #[ignore]
     fn test_ssh_connect() {
         let ssh_user = "ssh".to_string();
         let ssh_password = "password".to_string();
@@ -53,5 +65,21 @@ mod test {
         let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
         assert!(client.connect().is_ok());
     }
+
     
+    #[test]
+    fn test_ssh_exec_cmd() {
+        let ssh_user = "ssh".to_string();
+        let ssh_password = "password".to_string();
+
+        let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
+        assert!(client.connect().is_ok());
+        
+        let commands = vec!["echo hello".to_string(), "echo world".to_string()];
+        let results = client.exec(commands).expect("Failed to execute commands");
+
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].trim(), "hello");
+        assert_eq!(results[1].trim(), "world");
+    }
 }
