@@ -1,33 +1,59 @@
+use anyhow::Result;
+use serde_json::{Deserializer};
 
-
-struct CpuTemp {
+pub struct CpuTemp {
   cpuid: u8,
   current: u8
 }
 
-struct Fan {
+pub struct Fan {
   name: String,
   current: u8,
   status: String
 }
 
-struct TempData {
+pub struct TempData {
   cpu_temps: Vec<CpuTemp>,
   high_temp_critical_reached_component: bool,
   inlet: u8,
   num_fans: u8,
+}
 
 
+fn json_parser(json: &str) -> Result<()> {
+  
+  let data: serde_json::Value = serde_json::from_str(json)?;
+  // println!("{:?}", data);
+  println!("{:?}", data.get("Fans"));
+  
+  
+  // Get fan data
+  let fan_data: serde_json::Value;
+
+  match data.get("Fans") {
+    None => {
+      return Err(anyhow::anyhow!("No fan data found"));
+    },
+    Some(fan_data_raw) => {
+      fan_data = fan_data_raw.clone();
+    }
+  }
+
+  // fan data to struct
   
 
+
+
+
+
+    Ok(())
 
 }
 
 
-
 #[cfg(test)]
 mod test {
-    const ilo_json: String = r###"
+    const ILO_JSON: &str = r###"
 {
   "@odata.context": "/redfish/v1/$metadata#Chassis/Members/1/Thermal$entity",
   "@odata.id": "/redfish/v1/Chassis/1/Thermal/",
@@ -969,4 +995,10 @@ mod test {
 
 "###;
     
+    
+    #[test]
+    fn test_json_parser() {
+        let result = super::json_parser(ILO_JSON);
+        assert!(result.is_ok());
+    }
 }
