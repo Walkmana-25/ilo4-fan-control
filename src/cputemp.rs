@@ -23,24 +23,20 @@ pub struct TempData {
 fn json_parser(json: &str) -> Result<()> {
   
   let data: serde_json::Value = serde_json::from_str(json)?;
-  // println!("{:?}", data);
   println!("{:?}", data.get("Fans"));
-  
-  
-  // Get fan data
-  let fan_data: serde_json::Value;
 
-  match data.get("Fans") {
+  // Get fan data
+  let fan_data = match data.get("Fans") {
     None => {
       return Err(anyhow::anyhow!("No fan data found"));
     },
     Some(fan_data_raw) => {
-      fan_data = fan_data_raw.clone();
+      fan_data_raw.as_array()
     }
-  }
-
+  };
+      // Get the array from
   // fan data to struct
-  
+  println!("{:?}", fan_data);
 
 
 
