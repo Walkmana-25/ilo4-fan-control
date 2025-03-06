@@ -4,6 +4,7 @@ use log::{info, error};
 use anyhow::{Result, Context};
 
 mod ssh;
+mod cputemp;
 
 /// HP iLO4サーバー用ファン制御ユーティリティ
 #[derive(Parser)]

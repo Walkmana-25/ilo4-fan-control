@@ -1,15 +1,31 @@
 
 
+struct CpuTemp {
+  cpuid: u8,
+  current: u8
+}
+
+struct Fan {
+  name: String,
+  current: u8,
+  status: String
+}
+
+struct TempData {
+  cpu_temps: Vec<CpuTemp>,
+  high_temp_critical_reached_component: bool,
+  inlet: u8,
+  num_fans: u8,
+
+
+  
+
+
+}
 
 
 
-
-
-
-
-
-
-#[test]
+#[cfg(test)]
 mod test {
     const ilo_json: String = r###"
 {
