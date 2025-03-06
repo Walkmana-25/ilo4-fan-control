@@ -39,6 +39,48 @@ fn json_parser(json: &str) -> Result<()> {
   // fan data to struct
   println!("{:?}", fan_data);
 
+  let mut fans: Vec<Fan> = Vec::new();
+  
+  match fan_data {
+    None => {
+      return Err(anyhow::anyhow!("No fan data found"));
+    },
+    Some(fan_data) => {
+      for fan in fan_data {
+        let fan_name = match fan.get("FanName") {
+          None => {
+            return Err(anyhow::anyhow!("No fan name found"));
+          },
+          Some(fan_name) => {
+            fan_name.as_str()
+          }
+        };
+        let current_reading = match fan.get("CurrentReading") {
+          None => {
+            return Err(anyhow::anyhow!("No current reading found"));
+          },
+          Some(current_reading) => {
+            current_reading.as_u64()
+          }
+        };
+        let status = match fan.get("Status") {
+          None => {
+            return Err(anyhow::anyhow!("No status found"));
+          },
+          Some(status) => {
+            status.get("Health").unwrap().as_str()
+          }
+        };
+        let fan = Fan {
+          name: fan_name.unwrap().to_string(),
+          current: current_reading.unwrap() as u8,
+          status: status.unwrap().to_string()
+        };
+        fans.push(fan);
+      }
+    }
+  }
+
 
 
 
