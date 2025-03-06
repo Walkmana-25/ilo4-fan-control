@@ -17,6 +17,7 @@ pub struct TempData {
   high_temp_critical_reached_component: bool,
   inlet: u8,
   num_fans: u8,
+  fans: Vec<Fan>
 }
 
 
