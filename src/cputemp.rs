@@ -1176,6 +1176,8 @@ mod test {
         fans,
       };
       println!("temp_data: {:#?}", temp_data);
+      println!("Result_data: {:#?}", result.as_ref().unwrap());
+
       
       assert_eq!(result.unwrap(), temp_data);
       
