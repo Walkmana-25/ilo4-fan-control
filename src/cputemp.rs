@@ -1,94 +1,165 @@
 use anyhow::Result;
-use serde_json::{Deserializer};
+use serde_json::Deserializer;
 
 pub struct CpuTemp {
-  cpuid: u8,
-  current: u8
+    cpuid: u8,
+    current: u8,
 }
 
 pub struct Fan {
-  name: String,
-  current: u8,
-  status: String
+    name: String,
+    current: u8,
+    status: String,
 }
 
 pub struct TempData {
-  cpu_temps: Vec<CpuTemp>,
-  high_temp_critical_reached_component: bool,
-  inlet: u8,
-  num_fans: u8,
-  fans: Vec<Fan>
+    cpu_temps: Vec<CpuTemp>,
+    high_temp_critical_reached_component: bool,
+    high_temp_component_name: Vec<String>,
+    num_fans: u8,
+    fans: Vec<Fan>,
 }
 
+fn json_parser(json: &str) -> Result<TempData> {
+    let data: serde_json::Value = serde_json::from_str(json)?;
 
-fn json_parser(json: &str) -> Result<()> {
-  
-  let data: serde_json::Value = serde_json::from_str(json)?;
-  println!("{:?}", data.get("Fans"));
+    // Get fan data
+    let fan_data = match data.get("Fans") {
+        None => {
+            return Err(anyhow::anyhow!("No fan data found"));
+        }
+        Some(fan_data_raw) => fan_data_raw.as_array(),
+    };
+    // Get the array from
+    // fan data to struct
 
-  // Get fan data
-  let fan_data = match data.get("Fans") {
-    None => {
-      return Err(anyhow::anyhow!("No fan data found"));
-    },
-    Some(fan_data_raw) => {
-      fan_data_raw.as_array()
+    let mut fans: Vec<Fan> = Vec::new();
+
+    match fan_data {
+        None => {
+            return Err(anyhow::anyhow!("No fan data found"));
+        }
+        Some(fan_data) => {
+            for fan in fan_data {
+                let fan_name = match fan.get("FanName") {
+                    None => {
+                        return Err(anyhow::anyhow!("No fan name found"));
+                    }
+                    Some(fan_name) => fan_name.as_str(),
+                };
+                let current_reading = match fan.get("CurrentReading") {
+                    None => {
+                        return Err(anyhow::anyhow!("No current reading found"));
+                    }
+                    Some(current_reading) => current_reading.as_u64(),
+                };
+                let status = match fan.get("Status") {
+                    None => {
+                        return Err(anyhow::anyhow!("No status found"));
+                    }
+                    Some(status) => status.get("Health").unwrap().as_str(),
+                };
+                let fan = Fan {
+                    name: fan_name.unwrap().to_string(),
+                    current: current_reading.unwrap() as u8,
+                    status: status.unwrap().to_string(),
+                };
+                fans.push(fan);
+            }
+        }
     }
-  };
-      // Get the array from
-  // fan data to struct
-  println!("{:?}", fan_data);
 
-  let mut fans: Vec<Fan> = Vec::new();
-  
-  match fan_data {
-    None => {
-      return Err(anyhow::anyhow!("No fan data found"));
-    },
-    Some(fan_data) => {
-      for fan in fan_data {
-        let fan_name = match fan.get("FanName") {
-          None => {
-            return Err(anyhow::anyhow!("No fan name found"));
-          },
-          Some(fan_name) => {
-            fan_name.as_str()
-          }
+    // cpu temp data to struct
+    let temperatures = match data.get("Temperatures") {
+        None => {
+            return Err(anyhow::anyhow!("No temperature data found"));
+        }
+        Some(temperatures) => temperatures.as_array().unwrap(),
+    };
+
+    let mut high_temp_critical_reached_component = false;
+    let mut high_temp_component_name: Vec<String> = Vec::new();
+
+    // check if high temp critical reached
+    for temp in temperatures {
+        // Get the current reading
+        let current_reading = match temp.get("CurrentReading") {
+            None => {
+                return Err(anyhow::anyhow!("No current reading found"));
+            }
+            Some(current_reading) => current_reading.as_u64(),
         };
-        let current_reading = match fan.get("CurrentReading") {
-          None => {
-            return Err(anyhow::anyhow!("No current reading found"));
-          },
-          Some(current_reading) => {
-            current_reading.as_u64()
-          }
+
+        //get UpperThresholdCritical
+        let upper_threshold_critical = match temp.get("UpperThresholdCritical") {
+            None => {
+                return Err(anyhow::anyhow!("No UpperThresholdCritical found"));
+            }
+            Some(upper_threshold_critical) => upper_threshold_critical.as_u64(),
         };
-        let status = match fan.get("Status") {
-          None => {
-            return Err(anyhow::anyhow!("No status found"));
-          },
-          Some(status) => {
-            status.get("Health").unwrap().as_str()
-          }
+        let current_component_name = match temp.get("Name") {
+            None => {
+                return Err(anyhow::anyhow!("No component name found"));
+            }
+            Some(current_component_name) => current_component_name.as_str(),
         };
-        let fan = Fan {
-          name: fan_name.unwrap().to_string(),
-          current: current_reading.unwrap() as u8,
-          status: status.unwrap().to_string()
-        };
-        fans.push(fan);
-      }
+
+        if current_reading.unwrap() > upper_threshold_critical.unwrap()
+            && upper_threshold_critical.unwrap() != 0
+        {
+            high_temp_critical_reached_component = true;
+            high_temp_component_name.push(current_component_name.unwrap().to_string());
+        }
     }
-  }
 
+    let mut cpu_temps: Vec<CpuTemp> = Vec::new();
 
+    // Get the cpu temps
+    for temp in temperatures {
+        let physical_context = match temp.get("PhysicalContext") {
+            None => {
+                return Err(anyhow::anyhow!("No PhysicalContext found"));
+            }
+            Some(physical_context) => physical_context.as_str(),
+        };
 
+        if physical_context.unwrap() == "CPU" {
+            let name = match temp.get("Name") {
+                None => {
+                    return Err(anyhow::anyhow!("No name found"));
+                }
+                Some(name) => name.as_str().unwrap(),
+            };
+            let current_reading = match temp.get("CurrentReading") {
+                None => {
+                    return Err(anyhow::anyhow!("No current reading found"));
+                }
+                Some(current_reading) => current_reading.as_u64().unwrap() as u8,
+            };
 
+            let cpu_temp = CpuTemp {
+                cpuid: name
+                    .split_whitespace()
+                    .last()
+                    .unwrap()
+                    .parse::<u8>()
+                    .unwrap(),
+                current: current_reading,
+            };
 
-    Ok(())
+            cpu_temps.push(cpu_temp);
+        }
+    }
 
+    let temp_data: TempData = TempData {
+        cpu_temps,
+        high_temp_critical_reached_component,
+        high_temp_component_name,
+        num_fans: fans.len() as u8,
+        fans,
+    };
+    Ok(temp_data)
 }
-
 
 #[cfg(test)]
 mod test {
@@ -1033,8 +1104,7 @@ mod test {
 }
 
 "###;
-    
-    
+
     #[test]
     fn test_json_parser() {
         let result = super::json_parser(ILO_JSON);
