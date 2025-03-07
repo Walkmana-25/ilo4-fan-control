@@ -1,17 +1,20 @@
 use anyhow::Result;
 use serde_json::Deserializer;
 
+#[derive(Debug, PartialEq)]
 pub struct CpuTemp {
     cpuid: u8,
     current: u8,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Fan {
     name: String,
     current: u8,
     status: String,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct TempData {
     cpu_temps: Vec<CpuTemp>,
     high_temp_critical_reached_component: bool,
@@ -1109,5 +1112,72 @@ mod test {
     fn test_json_parser() {
         let result = super::json_parser(ILO_JSON);
         assert!(result.is_ok());
+
+    }
+    
+    #[test]
+    fn test_json_parser_result() {
+      let result = super::json_parser(ILO_JSON);
+      
+      let cpu_temps: Vec<super::CpuTemp> = vec![
+        super::CpuTemp {
+          cpuid: 1,
+          current: 44,
+        },
+        super::CpuTemp {
+          cpuid: 2,
+          current: 47,
+        },
+      ];
+      
+      let fans: Vec<super::Fan> = vec![
+        super::Fan {
+          current: 11,
+          name: "Fan 1".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 2".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 3".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 4".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 5".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 6".to_string(),
+          status: "OK".to_string(),
+        },
+        super::Fan {
+          current: 11,
+          name: "Fan 7".to_string(),
+          status: "OK".to_string(),
+        },
+      ];
+      
+      let temp_data: super::TempData = super::TempData {
+        cpu_temps,
+        high_temp_critical_reached_component: false,
+        high_temp_component_name: vec![],
+        num_fans: 7,
+        fans,
+      };
+      println!("temp_data: {:#?}", temp_data);
+      
+      assert_eq!(result.unwrap(), temp_data);
+      
     }
 }
