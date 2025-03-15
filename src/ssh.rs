@@ -59,7 +59,7 @@ impl SshClient {
 mod test {
     #[test]
     fn test_ssh_connect() {
-        let ssh_user = "ssh".to_string();
+        let ssh_user = "test".to_string();
         let ssh_password = "password".to_string();
 
         let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
@@ -69,7 +69,7 @@ mod test {
     
     #[test]
     fn test_ssh_exec_cmd() {
-        let ssh_user = "ssh".to_string();
+        let ssh_user = "test".to_string();
         let ssh_password = "password".to_string();
 
         let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
