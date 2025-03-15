@@ -23,6 +23,19 @@ pub struct TempData {
     fans: Vec<Fan>,
 }
 
+async fn get_ilo_data(url: &str) -> Result<String> {
+  let client = reqwest::Client::builder()
+    .danger_accept_invalid_certs(true)
+    .build()?;
+  let resp = client.get(url)
+    .send()
+    .await?
+    .text()
+    .await?;
+  Ok(resp)
+
+}
+
 fn json_parser(json: &str) -> Result<TempData> {
     let data: serde_json::Value = serde_json::from_str(json)?;
 
