@@ -1120,6 +1120,7 @@ mod test {
 }
 
 "###;
+use super::*;
 
     #[test]
     fn test_json_parser() {
@@ -1195,4 +1196,14 @@ mod test {
       assert_eq!(result.unwrap(), temp_data);
       
     }
+    
+    #[tokio::test]
+    async fn test_async_function() {
+        let result = get_ilo_data("https://google.com").await;
+        assert!(result.is_ok());
+        
+
+
+    }
+    
 }
