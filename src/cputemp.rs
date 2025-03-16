@@ -1199,8 +1199,10 @@ use super::*;
     
     #[tokio::test]
     async fn test_async_function() {
-        let result = get_ilo_data("https://google.com").await;
+        let result = get_ilo_data("https://localhost").await;
+        println!("Result: {:#?}", result);
         assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "Hello-World-Test");
         
 
 
