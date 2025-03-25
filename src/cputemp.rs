@@ -23,6 +23,13 @@ pub struct TempData {
     fans: Vec<Fan>,
 }
 
+pub async fn get_temp_data(address: &str) -> Result<TempData> {
+    let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
+    let json = get_ilo_data(&url).await?;
+    let temp_data = json_parser(&json)?;
+    Ok(temp_data)
+}
+
 async fn get_ilo_data(url: &str) -> Result<String> {
   let client = reqwest::Client::builder()
     .danger_accept_invalid_certs(true)
