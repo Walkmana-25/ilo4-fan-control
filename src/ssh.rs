@@ -28,6 +28,21 @@ impl SshClient {
         self.session = Some(ssh2::Session::new().with_context(|| "SSHセッションの作成に失敗しました")?);
         
         let session = self.session.as_mut().unwrap();
+        
+        // 古いキー交換アルゴリズムを追加
+        session.method_pref(ssh2::MethodType::Kex, 
+            "diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1")?;
+        
+        // 古いホストキーアルゴリズムを追加
+        session.method_pref(ssh2::MethodType::HostKey, 
+            "ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa")?;
+        
+        // 古い暗号化アルゴリズムを追加
+        session.method_pref(ssh2::MethodType::CryptCs, 
+            "aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc")?;
+        session.method_pref(ssh2::MethodType::CryptSc, 
+            "aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc")?;
+        
         session.set_tcp_stream(tcp);
         session.handshake()?;
         
