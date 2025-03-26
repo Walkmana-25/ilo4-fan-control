@@ -1206,13 +1206,32 @@ use super::*;
     
     #[tokio::test]
     async fn test_async_function() {
+        use std::process::{Command, Child};
+        use std::thread::sleep;
+        use std::time::Duration;
+        use std::path::Path;
+
+        // Start the test server as a background process
+        println!("Starting test HTTPS server...");
+        let server_dir = Path::new("/workspaces/ilo4-fan-control/test-https-server");
+        let mut server_process = Command::new("python3")
+            .arg("runserver.py")
+            .current_dir(server_dir)
+            .spawn()
+            .expect("Failed to start test server");
+
+        // Give the server a moment to start
+        sleep(Duration::from_secs(2));
+        
+        // Run the actual test
         let result = get_ilo_data("https://localhost").await;
         println!("Result: {:#?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");
         
-
-
+        // Clean up: kill the server process
+        let _ = server_process.kill();
+        println!("Test server stopped");
     }
     
 }
