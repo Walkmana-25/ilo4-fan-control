@@ -5,6 +5,11 @@ edition = "2021"
 description = "HP iLO4サーバー用ファン制御ユーティリティ"
 authors = ["Your Name <your.email@example.com>"]
 
+# Add library target to enable doc tests
+[lib]
+name = "ilo4_fan_control"
+path = "src/lib.rs"
+
 [[bin]]
 name = "fctrl"
 path = "src/main.rs"
@@ -20,3 +25,6 @@ openssl-sys = "0.9.106"
 serde_json = "1.0.140"
 tokio = { version = "1.44.1", features = ["full"] }
 reqwest = { version = "0.12.14", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+validator = { version = "0.20.0", features = ["derive"] }
+toml = "0.8.20"
