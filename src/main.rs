@@ -22,13 +22,13 @@ struct Cli {
     log_level: String,
     
     /// iLO4 host address
-    #[arg(short, long)]
+    #[arg(long)]
     host: String,
     /// iLO4 username
-    #[arg(short, long)]
+    #[arg(long)]
     user: String,
     /// iLO4 password
-    #[arg(short, long)]
+    #[arg(long)]
     password: String,
 
     #[command(subcommand)]
