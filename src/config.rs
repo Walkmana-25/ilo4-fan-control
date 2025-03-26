@@ -8,6 +8,7 @@ use anyhow::Result;
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct IloConfig {
     pub run_period_seconds: u8,
+    #[validate(nested)]
     pub targets: Vec<TargetIlo>,
 }
 
@@ -17,6 +18,7 @@ pub struct TargetIlo {
     pub user: String,
     pub password: String,
     pub target_fans: TargetFans,
+    #[validate(nested)]
     pub temprature_fan_config: Vec<FanConfig>,
 }
 
@@ -85,6 +87,157 @@ impl IloConfig {
     pub fn save_to_toml_file<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let toml_string = toml::to_string_pretty(self)?;
         fs::write(path, toml_string)?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    fn create_valid_config() -> IloConfig {
+        IloConfig {
+            run_period_seconds: 60,
+            targets: vec![
+                TargetIlo {
+                    host: "192.168.1.100".to_string(),
+                    user: "admin".to_string(),
+                    password: "password123".to_string(),
+                    target_fans: TargetFans::NumFans(3),
+                    temprature_fan_config: vec![
+                        FanConfig {
+                            min_temp: 30,
+                            max_temp: 50,
+                            max_fan_speed: 50,
+                        },
+                        FanConfig {
+                            min_temp: 51,
+                            max_temp: 70,
+                            max_fan_speed: 100,
+                        },
+                    ],
+                },
+                TargetIlo {
+                    host: "192.168.1.101".to_string(),
+                    user: "admin".to_string(),
+                    password: "password456".to_string(),
+                    target_fans: TargetFans::TargetFans(vec![1, 2]),
+                    temprature_fan_config: vec![
+                        FanConfig {
+                            min_temp: 25,
+                            max_temp: 40,
+                            max_fan_speed: 30,
+                        },
+                        FanConfig {
+                            min_temp: 41,
+                            max_temp: 60,
+                            max_fan_speed: 80,
+                        },
+                    ],
+                },
+            ],
+        }
+    }
+
+    fn write_config_to_temp_file(config: &IloConfig) -> Result<NamedTempFile> {
+        let mut temp_file = NamedTempFile::new()?;
+        let toml_string = toml::to_string_pretty(config)?;
+        write!(temp_file, "{}", toml_string)?;
+        Ok(temp_file)
+    }
+
+    #[test]
+    fn test_valid_config_validation() {
+        let config = create_valid_config();
+        assert!(config.validate().is_ok());
+    }
+
+    #[test]
+    fn test_invalid_fan_speed_validation() {
+        let mut config = create_valid_config();
+        // Set an invalid fan speed above 100%
+        config.targets[0].temprature_fan_config[0].max_fan_speed = 120;
+        assert!(config.validate().is_err());
+    }
+
+    #[test]
+    fn test_load_from_toml_file() -> Result<()> {
+        let config = create_valid_config();
+        let temp_file = write_config_to_temp_file(&config)?;
+        
+        let loaded_config = IloConfig::from_toml_file(temp_file.path())?;
+        
+        assert_eq!(loaded_config.run_period_seconds, config.run_period_seconds);
+        assert_eq!(loaded_config.targets.len(), config.targets.len());
+        
+        // Check first target details
+        assert_eq!(loaded_config.targets[0].host, config.targets[0].host);
+        assert_eq!(loaded_config.targets[0].user, config.targets[0].user);
+        
+        // Check if we correctly loaded the fan configuration
+        let first_target_fan_config = &loaded_config.targets[0].temprature_fan_config[0];
+        assert_eq!(first_target_fan_config.min_temp, 30);
+        assert_eq!(first_target_fan_config.max_temp, 50);
+        assert_eq!(first_target_fan_config.max_fan_speed, 50);
+        
+        Ok(())
+    }
+
+    #[test]
+    fn test_save_to_toml_file() -> Result<()> {
+        let config = create_valid_config();
+        let temp_file = NamedTempFile::new()?;
+        let temp_path = temp_file.path().to_path_buf();
+        
+        config.save_to_toml_file(&temp_path)?;
+        
+        // Read the file and parse it back
+        let loaded_config = IloConfig::from_toml_file(&temp_path)?;
+        
+        // Verify the round trip worked correctly
+        assert_eq!(loaded_config.run_period_seconds, config.run_period_seconds);
+        assert_eq!(loaded_config.targets.len(), config.targets.len());
+        
+        Ok(())
+    }
+
+    #[test]
+    fn test_target_fans_variants() {
+        let config = create_valid_config();
+        
+        // Check NumFans variant
+        match &config.targets[0].target_fans {
+            TargetFans::NumFans(num) => assert_eq!(*num, 3),
+            _ => panic!("Expected NumFans variant"),
+        }
+        
+        // Check TargetFans variant
+        match &config.targets[1].target_fans {
+            TargetFans::TargetFans(fans) => {
+                assert_eq!(fans.len(), 2);
+                assert_eq!(fans[0], 1);
+                assert_eq!(fans[1], 2);
+            },
+            _ => panic!("Expected TargetFans variant"),
+        }
+    }
+
+    #[test]
+    fn test_invalid_file_path() {
+        let result = IloConfig::from_toml_file("/nonexistent/path/config.toml");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_invalid_toml_content() -> Result<()> {
+        let mut temp_file = NamedTempFile::new()?;
+        write!(temp_file, "This is not valid TOML content")?;
+        
+        let result = IloConfig::from_toml_file(temp_file.path());
+        assert!(result.is_err());
+        
         Ok(())
     }
 }

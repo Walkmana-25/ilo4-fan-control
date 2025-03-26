@@ -712,6 +712,7 @@ dependencies = [
  "serde",
  "serde_json",
  "ssh2",
+ "tempfile",
  "tokio",
  "toml",
  "validator",
