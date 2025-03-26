@@ -7,6 +7,7 @@ mod ssh;
 mod cputemp;
 mod config;
 mod gen_ssh;
+mod cmds;
 
 /// HP iLO4サーバー用ファン制御ユーティリティ
 ///
