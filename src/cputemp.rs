@@ -1,5 +1,4 @@
 use anyhow::Result;
-use serde_json::Deserializer;
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {
@@ -23,6 +22,16 @@ pub struct TempData {
     fans: Vec<Fan>,
 }
 
+/// Retrieves temperature and fan data from an ILO interface
+///
+/// # Arguments
+/// * `address` - The hostname or IP address of the ILO interface
+///
+/// # Returns
+/// * `Result<TempData>` - Temperature and fan data or an error
+///
+/// This function makes an HTTPS request to the ILO's Redfish API endpoint
+/// to get current temperature and fan status information.
 pub async fn get_temp_data(address: &str) -> Result<TempData> {
     let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
     let json = get_ilo_data(&url).await?;
@@ -30,6 +39,16 @@ pub async fn get_temp_data(address: &str) -> Result<TempData> {
     Ok(temp_data)
 }
 
+/// Makes an HTTPS request to an ILO interface
+///
+/// # Arguments
+/// * `url` - The complete URL to request from the ILO interface
+///
+/// # Returns
+/// * `Result<String>` - The response body as a string or an error
+///
+/// This function creates an HTTPS client that accepts self-signed certificates
+/// and makes a GET request to the specified URL.
 async fn get_ilo_data(url: &str) -> Result<String> {
   let client = reqwest::Client::builder()
     .danger_accept_invalid_certs(true)
@@ -43,6 +62,16 @@ async fn get_ilo_data(url: &str) -> Result<String> {
 
 }
 
+/// Parses JSON response from ILO into TempData structure
+///
+/// # Arguments
+/// * `json` - JSON string containing temperature and fan data
+///
+/// # Returns
+/// * `Result<TempData>` - Parsed temperature and fan data or an error
+///
+/// This function extracts relevant temperature and fan information from
+/// the ILO's JSON response and organizes it into a TempData structure.
 fn json_parser(json: &str) -> Result<TempData> {
     let data: serde_json::Value = serde_json::from_str(json)?;
 

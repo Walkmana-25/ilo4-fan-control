@@ -1,7 +1,7 @@
 use std::process;
 use clap::{Parser, Subcommand};
 use log::{info, error};
-use anyhow::{Result, Context};
+use anyhow::Result;
 
 mod ssh;
 mod cputemp;
@@ -9,7 +9,11 @@ mod config;
 mod gen_ssh;
 
 /// HP iLO4サーバー用ファン制御ユーティリティ
-#[derive(Parser)]
+///
+/// Command line interface for controlling fan speeds on HPE servers through
+/// their iLO4 management interface. Supports automatic temperature-based 
+/// fan speed control.
+#[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// ログレベルの設定
@@ -20,7 +24,7 @@ struct Cli {
     command: Commands,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Commands {
     /// 現在のファン状態を表示
     Status {
@@ -40,6 +44,10 @@ enum Commands {
     Auto,
 }
 
+/// Main entry point for the fan control application
+///
+/// Reads configuration, establishes connections to iLO interfaces,
+/// monitors temperatures, and adjusts fan speeds accordingly.
 fn main() -> Result<()> {
     let cli = Cli::parse();
 

@@ -5,39 +5,73 @@ use std::fs;
 use std::path::Path;
 use anyhow::Result;
 
+/// Configuration for ILO fan control
+/// 
+/// This structure represents the top-level configuration for controlling fans
+/// through the Integrated Lights-Out (ILO) interface.
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct IloConfig {
+    /// The period in seconds between fan control updates
     pub run_period_seconds: u8,
+    /// List of ILO targets to control
     #[validate(nested)]
     pub targets: Vec<TargetIlo>,
 }
 
+/// Configuration for a single ILO target
+/// 
+/// This structure contains connection details and fan control settings
+/// for a specific ILO interface.
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct TargetIlo {
+    /// The hostname or IP address of the ILO interface
     pub host: String,
+    /// Username for ILO authentication
     pub user: String,
+    /// Password for ILO authentication
     pub password: String,
+    /// Fan control target configuration
     pub target_fans: TargetFans,
+    /// Temperature-based fan speed configuration
     #[validate(nested)]
     pub temprature_fan_config: Vec<FanConfig>,
 }
 
+/// Configuration for temperature-based fan control
+/// 
+/// Defines the fan speed settings for specific temperature ranges.
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct FanConfig {
+    /// Minimum temperature threshold in Celsius
     pub min_temp: u8,
+    /// Maximum temperature threshold in Celsius
     pub max_temp: u8,
+    /// Maximum fan speed percentage (0-100)
     #[validate(range(min = 0, max = 100))]
     pub max_fan_speed: u8,
 }
 
+/// Fan target specification
+/// 
+/// Specifies either the number of fans to control or specific fan indices.
 #[derive(Serialize, Deserialize, Debug)]
 pub enum TargetFans {
+    /// Control a specific number of fans (starting from index 0)
     NumFans(u8),
+    /// Control specific fans by their indices
     TargetFans(Vec<u8>),
 }
 
 
 impl IloConfig {
+    /// Validates the configuration according to the defined validation rules
+    /// 
+    /// Checks that all nested configurations are valid, including fan speed ranges
+    /// and any other constraints defined by the Validate trait.
+    /// 
+    /// # Returns
+    /// 
+    /// * `Result<(), ValidationErrors>` - Ok if validation passes, or ValidationErrors if it fails
     pub fn validate(&self) -> Result<(), ValidationErrors> {
         <Self as Validate>::validate(self)
     }

@@ -2,6 +2,10 @@ use anyhow::{Result, Context};
 use std::net::TcpStream;
 use std::io::Read;
 
+/// SSH client for ILO connection
+/// 
+/// Provides functionality to establish SSH connections and execute commands
+/// on an ILO interface using SSH protocol with legacy algorithm support.
 pub struct SshClient {
     host: String,
     user: String,
@@ -10,7 +14,15 @@ pub struct SshClient {
 }
 
 impl SshClient {
-
+    /// Creates a new SSH client instance
+    /// 
+    /// # Arguments
+    /// * `host` - Hostname or IP address of the ILO interface
+    /// * `user` - Username for SSH authentication
+    /// * `password` - Password for SSH authentication
+    /// 
+    /// # Returns
+    /// * `SshClient` - A new instance of the SSH client
     pub fn new(host: String, user: String, password: String) -> Self {
         SshClient {
             host,
@@ -20,7 +32,13 @@ impl SshClient {
         }
     }
 
-
+    /// Establishes an SSH connection to the ILO interface
+    /// 
+    /// # Returns
+    /// * `Result<()>` - Success or an error
+    /// 
+    /// This method configures the SSH session with legacy algorithm support
+    /// required for ILO interfaces and establishes the connection.
     pub fn connect(&mut self) -> Result<()> {
         let tcp = TcpStream::connect(format!("{}:22", self.host))
             .with_context(|| format!("SSH接続に失敗しました: {}", self.host))?;
@@ -29,15 +47,15 @@ impl SshClient {
         
         let session = self.session.as_mut().unwrap();
         
-        // 古いキー交換アルゴリズムを追加
+        // Configure legacy key exchange algorithms
         session.method_pref(ssh2::MethodType::Kex, 
             "diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1")?;
         
-        // 古いホストキーアルゴリズムを追加
+        // Configure legacy host key algorithms
         session.method_pref(ssh2::MethodType::HostKey, 
             "ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa")?;
         
-        // 古い暗号化アルゴリズムを追加
+        // Configure legacy encryption algorithms
         session.method_pref(ssh2::MethodType::CryptCs, 
             "aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc")?;
         session.method_pref(ssh2::MethodType::CryptSc, 
@@ -48,15 +66,20 @@ impl SshClient {
         
         session.userauth_password(&self.user, &self.password)?;
         
-        
         Ok(())
-        
     }
     
+    /// Executes commands over the SSH connection
+    /// 
+    /// # Arguments
+    /// * `commands` - List of commands to execute
+    /// 
+    /// # Returns
+    /// * `Result<Vec<String>>` - Output of each command or an error
+    /// 
+    /// This method executes each command in sequence and collects their outputs.
     pub fn exec(&mut self, commands: Vec<String>) -> Result<Vec<String>> {
-        
         let mut result = Vec::new();
-
         for command in commands {
             let mut channel = self.session.as_mut().unwrap().channel_session()?;
             channel.exec(&command)?;
@@ -67,7 +90,6 @@ impl SshClient {
         }
         Ok(result)
     }
-    
 }
 
 #[cfg(test)]

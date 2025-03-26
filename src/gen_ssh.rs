@@ -1,4 +1,4 @@
-use crate::config::{IloConfig, TargetFans, TargetIlo};
+use crate::config::{TargetFans, TargetIlo};
 
 /// Generates fan control commands for a specific target ILO configuration
 ///
