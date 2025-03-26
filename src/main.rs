@@ -9,17 +9,27 @@ mod config;
 mod gen_ssh;
 mod cmds;
 
-/// HP iLO4サーバー用ファン制御ユーティリティ
+/// HPE iLO4 Fan Control Utility
 ///
 /// Command line interface for controlling fan speeds on HPE servers through
 /// their iLO4 management interface. Supports automatic temperature-based 
 /// fan speed control.
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(version)]
 struct Cli {
-    /// ログレベルの設定
+    /// Set the log level for the application
     #[arg(short, long, default_value = "info")]
     log_level: String,
+    
+    /// iLO4 host address
+    #[arg(short, long)]
+    host: String,
+    /// iLO4 username
+    #[arg(short, long)]
+    user: String,
+    /// iLO4 password
+    #[arg(short, long)]
+    password: String,
 
     #[command(subcommand)]
     command: Commands,
@@ -27,21 +37,17 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// 現在のファン状態を表示
-    Status {
-        /// 詳細情報を表示
-        #[arg(short, long)]
-        verbose: bool,
-    },
+    /// Displays the current fan status
+    Status,
 
-    /// ファン速度を手動で設定
+    /// Sets the fan speed manually
     Set {
-        /// ファンの速度 (0-100%)
+        /// Fan speed percentage (0-100)
         #[arg(short, long)]
         speed: u8,
     },
 
-    /// 自動モードへ切り替え
+    /// Sets the fan control to automatic mode
     Auto,
 }
 
@@ -56,14 +62,11 @@ fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or(&cli.log_level))
         .init();
 
-    info!("iLO4 ファン制御ユーティリティを開始します");
+    info!("Starting HPE iLO4 Fan Control Utility");
 
     match &cli.command {
-        Commands::Status { verbose } => {
+        Commands::Status => {
             println!("現在のファンステータスを取得しています...");
-            if *verbose {
-                println!("詳細モードが有効です");
-            }
             // ここにステータス取得のロジックを実装
         }
         Commands::Set { speed } => {
