@@ -18,18 +18,22 @@ mod cmds;
 #[command(version)]
 struct Cli {
     /// Set the log level for the application
-    #[arg(short, long, default_value = "info")]
+    #[arg(short, long, default_value = "off")]
     log_level: String,
     
     /// iLO4 host address
     #[arg(long)]
-    host: String,
+    host: Option<String>,
     /// iLO4 username
     #[arg(long)]
-    user: String,
+    user: Option<String>,
     /// iLO4 password
     #[arg(long)]
-    password: String,
+    password: Option<String>, // Changed to Option<String>
+
+    /// No interactive mode
+    #[arg(long)]
+    no_interactive: bool,
 
     #[command(subcommand)]
     command: Commands,
