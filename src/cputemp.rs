@@ -1206,7 +1206,7 @@ use super::*;
     
     #[tokio::test]
     async fn test_async_function() {
-        use std::process::{Command, Child};
+        use std::process::Command;
         use std::thread::sleep;
         use std::time::Duration;
         use std::path::Path;
@@ -1229,8 +1229,9 @@ use super::*;
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");
         
-        // Clean up: kill the server process
-        let _ = server_process.kill();
+        // Clean up: kill the server process and wait for it to finish
+        server_process.kill().expect("Failed to kill server process");
+        server_process.wait().expect("Failed to wait for server process");
         println!("Test server stopped");
     }
     
