@@ -60,6 +60,7 @@ impl IloConfig {
     pub fn from_toml_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let content = fs::read_to_string(path)?;
         let config: IloConfig = toml::from_str(&content)?;
+        config.validate()?;
         Ok(config)
     }
     
