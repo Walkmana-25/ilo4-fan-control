@@ -1,13 +1,14 @@
 
 use log::{
-    info, error,debug
+    info, error, debug
 };
+use serde::de;
 use tokio::runtime::Runtime;
 
 pub fn show_status(host: Option<String>, user: Option<String>, password: Option<String>) {
     debug!("Showing status");
-
     
+    let (host, user, password) = crate::cmds::utils::get_connection_info(host, user, password);  
 
     // Initialize the Tokio runtime
     // Run show status runner for get temp

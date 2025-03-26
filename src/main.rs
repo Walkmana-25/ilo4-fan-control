@@ -70,8 +70,11 @@ fn main() -> Result<()> {
 
     match &cli.command {
         Commands::Status => {
-            println!("現在のファンステータスを取得しています...");
-            // ここにステータス取得のロジックを実装
+            cmds::status::show_status(
+                cli.host.clone(),
+                cli.user.clone(),
+                cli.password.clone(),
+            );
         }
         Commands::Set { speed } => {
             if *speed > 100 {
