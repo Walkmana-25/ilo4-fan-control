@@ -6,6 +6,7 @@ use anyhow::{Result, Context};
 mod ssh;
 mod cputemp;
 mod config;
+mod gen_ssh;
 
 /// HP iLO4サーバー用ファン制御ユーティリティ
 #[derive(Parser)]

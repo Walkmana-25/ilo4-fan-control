@@ -7,25 +7,25 @@ use anyhow::Result;
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct IloConfig {
-    run_period_seconds: u8,
-    targets: Vec<TargetIlo>,
+    pub run_period_seconds: u8,
+    pub targets: Vec<TargetIlo>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct TargetIlo {
-    host: String,
-    user: String,
-    password: String,
-    target_fans: TargetFans,
-    temprature_fan_config: Vec<FanConfig>,
+    pub host: String,
+    pub user: String,
+    pub password: String,
+    pub target_fans: TargetFans,
+    pub temprature_fan_config: Vec<FanConfig>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct FanConfig {
-    min_temp: u8,
-    max_temp: u8,
+    pub min_temp: u8,
+    pub max_temp: u8,
     #[validate(range(min = 0, max = 100))]
-    max_fan_speed: u8,
+    pub max_fan_speed: u8,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
