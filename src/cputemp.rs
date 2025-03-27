@@ -1,9 +1,17 @@
 use anyhow::Result;
+use log::{debug, info};
+use std::fmt::{self, write};
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {
     cpuid: u8,
     current: u8,
+}
+
+impl fmt::Display for CpuTemp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CPU {} Temperature: {}°C", self.cpuid, self.current)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -13,6 +21,18 @@ pub struct Fan {
     status: String,
 }
 
+impl fmt::Display for Fan {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f, 
+            "{}: {}%, Status: {}", 
+            self.name, 
+            self.current, 
+            self.status
+        )
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct TempData {
     cpu_temps: Vec<CpuTemp>,
@@ -20,6 +40,36 @@ pub struct TempData {
     high_temp_component_name: Vec<String>,
     num_fans: u8,
     fans: Vec<Fan>,
+}
+
+
+impl fmt::Display for TempData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f, 
+            "System Temperature Status: {}", 
+            if self.high_temp_critical_reached_component { "CRITICAL" } else { "Normal" }
+        )?;
+        
+        if self.high_temp_critical_reached_component {
+            writeln!(f, "Critical components:")?;
+            for component in &self.high_temp_component_name {
+                writeln!(f, " - {}", component)?;
+            }
+        }
+        
+        writeln!(f, "\nCPU Temperatures:")?;
+        for cpu in &self.cpu_temps {
+            writeln!(f, " - {}", cpu)?;
+        }
+        
+        writeln!(f, "\nFan Status (Count: {}):", self.num_fans)?;
+        for fan in &self.fans {
+            writeln!(f, " - {}", fan)?;
+        }
+        
+        Ok(())
+    }
 }
 
 /// Retrieves temperature and fan data from an ILO interface
@@ -34,6 +84,7 @@ pub struct TempData {
 /// to get current temperature and fan status information.
 pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<TempData> {
     let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
+    info!("Fetching temperature data from ILO at {}", url);
     let json = get_ilo_data(&url, user, password).await?;
     let temp_data = json_parser(&json)?;
     Ok(temp_data)
@@ -94,29 +145,40 @@ fn json_parser(json: &str) -> Result<TempData> {
         }
         Some(fan_data) => {
             for fan in fan_data {
+                debug!("Fan data: {:?}", fan);
                 let fan_name = match fan.get("FanName") {
                     None => {
                         return Err(anyhow::anyhow!("No fan name found"));
                     }
                     Some(fan_name) => fan_name.as_str(),
                 };
+                debug!("Fan name: {:?}", fan_name);
                 let current_reading = match fan.get("CurrentReading") {
                     None => {
                         return Err(anyhow::anyhow!("No current reading found"));
                     }
                     Some(current_reading) => current_reading.as_u64(),
                 };
+                debug!("Fan current reading: {:?}", current_reading);
+                let unknown = serde_json::Value::String("Unknown".into());
                 let status = match fan.get("Status") {
                     None => {
                         return Err(anyhow::anyhow!("No status found"));
                     }
-                    Some(status) => status.get("Health").unwrap().as_str(),
+                    Some(status) => status.get("Health").
+                                      unwrap_or_else(
+                                        || {
+                                          status.get("State").unwrap_or(&unknown)
+                                        }
+                                      ).as_str()
                 };
+                debug!("Fan status: {:?}", status);
                 let fan = Fan {
                     name: fan_name.unwrap().to_string(),
                     current: current_reading.unwrap() as u8,
                     status: status.unwrap().to_string(),
                 };
+                debug!("Fan: {:?}", fan);
                 fans.push(fan);
             }
         }
@@ -169,6 +231,7 @@ fn json_parser(json: &str) -> Result<TempData> {
 
     // Get the cpu temps
     for temp in temperatures {
+        debug!("Temp data: {:?}", temp);
         let physical_context = match temp.get("PhysicalContext") {
             None => {
                 return Err(anyhow::anyhow!("No PhysicalContext found"));
@@ -196,7 +259,7 @@ fn json_parser(json: &str) -> Result<TempData> {
                     .last()
                     .unwrap()
                     .parse::<u8>()
-                    .unwrap(),
+                    .unwrap_or(1),
                 current: current_reading,
             };
 

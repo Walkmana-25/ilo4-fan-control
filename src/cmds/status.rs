@@ -39,7 +39,7 @@ async fn show_status_runner(host: String, user: String, password: String) {
     match crate::cputemp::get_temp_data(host.as_str(), user.as_str(), password.as_str()).await {
         Ok(temp_data) => {
             info!("Temperature data: {:?}", temp_data);
-            println!("Temperature data: {:?}", temp_data);
+            println!("Temperature data: {}", temp_data);
         }
         Err(e) => {
             error!("Failed to get temperature data: {}", e);
