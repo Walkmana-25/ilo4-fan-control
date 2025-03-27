@@ -32,9 +32,9 @@ pub struct TempData {
 ///
 /// This function makes an HTTPS request to the ILO's Redfish API endpoint
 /// to get current temperature and fan status information.
-pub async fn get_temp_data(address: &str) -> Result<TempData> {
+pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<TempData> {
     let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
-    let json = get_ilo_data(&url).await?;
+    let json = get_ilo_data(&url, user, password).await?;
     let temp_data = json_parser(&json)?;
     Ok(temp_data)
 }
@@ -49,11 +49,12 @@ pub async fn get_temp_data(address: &str) -> Result<TempData> {
 ///
 /// This function creates an HTTPS client that accepts self-signed certificates
 /// and makes a GET request to the specified URL.
-async fn get_ilo_data(url: &str) -> Result<String> {
+async fn get_ilo_data(url: &str, user: &str, password: &str) -> Result<String> {
   let client = reqwest::Client::builder()
     .danger_accept_invalid_certs(true)
     .build()?;
   let resp = client.get(url)
+    .basic_auth(user, Some(password))
     .send()
     .await?
     .text()
@@ -1253,7 +1254,7 @@ use super::*;
         sleep(Duration::from_secs(2));
         
         // Run the actual test
-        let result = get_ilo_data("https://localhost").await;
+        let result = get_ilo_data("https://localhost", "user", "pass").await;
         println!("Result: {:#?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");
