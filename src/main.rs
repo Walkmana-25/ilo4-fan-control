@@ -97,16 +97,7 @@ fn main() -> Result<()> {
             } else if *sample {
                 cmds::sample::show_sample(path.clone());
             } else if *validate {
-                match cmds::config::toml_validation(path.clone()) {
-                    Ok(_) => {
-                        info!("TOML syntax validation passed");
-                    }
-                    Err(e) => {
-                        error!("TOML syntax validation failed: {}", e);
-                        process::exit(1);
-                    }
-                }
-                match cmds::config::config_validation(path.clone()) {
+                match cmds::config::config_check(path.clone()) {
                     Ok(_) => {
                         info!("Configuration validation passed");
                     }

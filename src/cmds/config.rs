@@ -7,7 +7,58 @@ use anyhow::{Error, Result};
 use toml::Value;
 
 
-pub fn config_validation(path: String) -> Result<String> {
+/// Validates the configuration file at the specified path
+/// 
+/// # Arguments
+/// * `path` - Path to the configuration file to validate
+/// 
+/// # Returns
+/// * `Result<String>` - Ok if validation passes, or an error message if it fails
+/// 
+/// # Example
+/// ```no_run
+/// 
+/// use ilo4_fan_control::cmds::config_check;
+/// 
+/// let path = "path/to/config.toml".to_string();
+/// match config_check(path) {
+///    Ok(message) => {
+///       println!("Validation passed: {}", message);
+///   }
+///   Err(e) => {
+///      println!("Validation failed: {}", e);
+///   }
+/// }
+/// ```
+/// 
+pub fn config_check(path: String) -> Result<String> {
+
+    debug!("Checking configuration at path: {}", path);
+
+    match toml_validation(path.clone()) {
+        Ok(_) => {
+            debug!("TOML syntax validation passed");
+        }
+        Err(e) => {
+            error!("TOML syntax validation failed: {}", e);
+            
+            return Err(Error::msg(format!("TOML syntax validation failed: {}", e)));
+        }
+    }
+    match config_validation(path.clone()) {
+        Ok(_) => {
+            debug!("Configuration validation passed");
+            Ok("Configuration validation passed".to_string())
+        }
+        Err(e) => {
+            error!("Configuration validation failed: {}", e);
+            Ok(format!("Configuration validation failed: {}", e))
+        }
+    }
+}
+
+
+fn config_validation(path: String) -> Result<String> {
     debug!("Validating config file");
     
     // Load the configuration from the specified path
@@ -39,7 +90,7 @@ pub fn config_validation(path: String) -> Result<String> {
 /// # Arguments
 ///
 /// * `path` - Path to the TOML file to validate
-pub fn toml_validation(path: String) -> Result<String> {
+fn toml_validation(path: String) -> Result<String> {
     debug!("Validating TOML syntax in file: {}", path);
     
     // Read the file content
