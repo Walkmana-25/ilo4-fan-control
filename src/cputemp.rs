@@ -10,7 +10,7 @@ pub struct CpuTemp {
 
 impl fmt::Display for CpuTemp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "CPU {} Temperature: {}°C", self.cpuid, self.current)
+        write!(f, "CPU {}\tTemperature:\t{}°C", self.cpuid, self.current)
     }
 }
 
@@ -25,7 +25,7 @@ impl fmt::Display for Fan {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f, 
-            "{}: {}%, Status: {}", 
+            "{}:\t{}%, Status:\t{}", 
             self.name, 
             self.current, 
             self.status
