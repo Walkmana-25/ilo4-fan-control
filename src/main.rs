@@ -101,7 +101,15 @@ fn main() -> Result<()> {
                         process::exit(1);
                     }
                 }
-                cmds::config::config_validation(path.clone());
+                match cmds::config::config_validation(path.clone()) {
+                    Ok(_) => {
+                        info!("Configuration validation passed");
+                    }
+                    Err(e) => {
+                        error!("Configuration validation failed: {}", e);
+                        process::exit(1);
+                    }
+                }
             } else {
                 error!("Please specify --sample or --validate");
                 process::exit(1);

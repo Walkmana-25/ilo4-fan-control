@@ -7,19 +7,26 @@ use anyhow::{Error, Result};
 use toml::Value;
 
 
-pub fn config_validation(path: String) {
+pub fn config_validation(path: String) -> Result<String> {
     debug!("Validating config file");
     
     // Load the configuration from the specified path
-    let config = IloConfig::from_toml_file(path).expect("Failed to load config");
+    let config = match IloConfig::from_toml_file(path) {
+        Ok(cfg) => cfg,
+        Err(e) => {
+            return Err(Error::msg(format!("Failed to load configuration: {}", e)));
+        }
+    };
+    
+    debug!("Configuration loaded successfully");
     
     // Validate the configuration
     match config.validate() {
         Ok(_) => {
-            info!("Configuration is valid");
+            Ok("Configuration is valid".to_string())
         }
         Err(e) => {
-            error!("Configuration validation failed: {}", e);
+            Err(Error::msg(format!("Configuration validation failed: {}", e)))
         }
     }
 }
