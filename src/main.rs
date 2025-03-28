@@ -18,7 +18,7 @@ mod cmds;
 #[command(version)]
 struct Cli {
     /// Set the log level for the application
-    #[arg(short, long, default_value = "off")]
+    #[arg(short, long, default_value = "info")]
     log_level: String,
     
     /// iLO4 host address
@@ -66,7 +66,7 @@ fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or(&cli.log_level))
         .init();
 
-    info!("Starting HPE iLO4 Fan Control Utility");
+    info!("Fan Control Utility for HPE iLO4\n");
 
     match &cli.command {
         Commands::Status => {
