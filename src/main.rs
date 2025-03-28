@@ -79,6 +79,11 @@ fn main() -> Result<()> {
                 cli.password.clone(),
             );
         }
+        Commands::Config { path, sample } => {
+            if *sample {
+                cmds::sample::show_sample(path.clone());
+            }   
+        }
         _ => {
             error!("Unknown command");
             process::exit(1);

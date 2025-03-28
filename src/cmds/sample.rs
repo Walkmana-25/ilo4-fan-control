@@ -1,4 +1,3 @@
-use ilo4_fan_control::cputemp::Fan;
 use log::{
     info, error, debug
 };
