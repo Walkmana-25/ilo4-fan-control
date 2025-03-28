@@ -44,11 +44,14 @@ enum Commands {
     /// Displays the current fan status
     Status,
 
-    /// Sets the fan speed manually
-    Set {
-        /// Fan speed percentage (0-100)
+    Config {
+        /// Path to the configuration file
         #[arg(short, long)]
-        speed: u8,
+        path: String,
+        
+        /// Generate sample configuration file
+        #[arg(short, long)]
+        sample: bool,
     },
 
     /// Sets the fan control to automatic mode
@@ -76,17 +79,9 @@ fn main() -> Result<()> {
                 cli.password.clone(),
             );
         }
-        Commands::Set { speed } => {
-            if *speed > 100 {
-                error!("速度は0-100%の範囲で指定してください");
-                process::exit(1);
-            }
-            println!("ファン速度を{}%に設定しています...", speed);
-            // ここに速度設定のロジックを実装
-        }
-        Commands::Auto => {
-            println!("ファンを自動モードに切り替えています...");
-            // ここに自動モード切替のロジックを実装
+        _ => {
+            error!("Unknown command");
+            process::exit(1);
         }
     }
 
