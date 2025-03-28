@@ -58,7 +58,4 @@ pub fn show_sample(path: String) {
             error!("Failed to save sample configuration: {}", e);
         }
     }
-    
-
-
 }

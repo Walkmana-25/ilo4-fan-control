@@ -44,14 +44,20 @@ enum Commands {
     /// Displays the current fan status
     Status,
 
+    /// Generates sample configuration files and Validate the configuration
     Config {
-        /// Path to the configuration file
+        /// Path to the target configuration file
         #[arg(short, long)]
         path: String,
         
         /// Generate sample configuration file
         #[arg(short, long)]
         sample: bool,
+        
+        /// Validate the configuration file against the IloConfig schema
+        #[arg(short, long)]
+        validate: bool,
+        
     },
 
     /// Sets the fan control to automatic mode
@@ -79,9 +85,26 @@ fn main() -> Result<()> {
                 cli.password.clone(),
             );
         }
-        Commands::Config { path, sample } => {
-            if *sample {
+        Commands::Config { path, sample, validate } => {
+            if *sample && *validate {
+                error!("Please use only one of --sample, --validate at a time");
+                process::exit(1);
+            } else if *sample {
                 cmds::sample::show_sample(path.clone());
+            } else if *validate {
+                match cmds::config::toml_validation(path.clone()) {
+                    Ok(_) => {
+                        info!("TOML syntax validation passed");
+                    }
+                    Err(e) => {
+                        error!("TOML syntax validation failed: {}", e);
+                        process::exit(1);
+                    }
+                }
+                cmds::config::config_validation(path.clone());
+            } else {
+                error!("Please specify --sample or --validate");
+                process::exit(1);
             }   
         }
         _ => {
