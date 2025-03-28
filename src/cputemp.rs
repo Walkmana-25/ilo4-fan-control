@@ -25,7 +25,7 @@ impl fmt::Display for Fan {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f, 
-            "{}:\t{}%, Status:\t{}", 
+            "{}:\t{}%,\tStatus:\t{}", 
             self.name, 
             self.current, 
             self.status
