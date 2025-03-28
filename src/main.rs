@@ -60,8 +60,13 @@ enum Commands {
         
     },
 
-    /// Sets the fan control to automatic mode
-    Auto,
+    /// Daemon mode for continuous monitoring and control
+    Daemon {
+        /// Path to the configuration file
+        #[arg(short, long)]
+        config_path: String,
+        
+    }
 }
 
 /// Main entry point for the fan control application
@@ -115,9 +120,12 @@ fn main() -> Result<()> {
                 process::exit(1);
             }   
         }
-        _ => {
-            error!("Unknown command");
-            process::exit(1);
+        
+        Commands::Daemon { config_path } => {
+            info!("Starting daemon with config path: {}", config_path);
+            // Daemon logic here
+            // For example, you can call a function to start the daemon
+            // cmds::daemon::start_daemon(config_path.clone());
         }
     }
 
