@@ -40,7 +40,6 @@ async fn show_status_runner(host: String, user: String, password: String) {
         }
         Err(e) => {
             error!("Failed to get temperature data: {}", e);
-            println!("Failed to get temperature data: {}", e);
         }
     
         
