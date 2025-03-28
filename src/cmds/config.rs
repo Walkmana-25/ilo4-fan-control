@@ -58,6 +58,30 @@ pub fn config_check(path: String) -> Result<String> {
 }
 
 
+/// Validates the configuration content against the IloConfig structure
+/// 
+/// This function loads the configuration from the specified path and
+/// validates it against the IloConfig structure's requirements.
+///
+/// # Arguments
+///
+/// * `path` - Path to the configuration file to validate
+///
+/// # Returns
+///
+/// * `Result<String>` - Ok with success message if validation passes, or Err with error details
+///
+/// # Example
+///
+/// ```no_run
+/// use ilo4_fan_control::cmds::config_validation;
+///
+/// let path = "path/to/config.toml".to_string();
+/// match config_validation(path) {
+///     Ok(message) => println!("Validation result: {}", message),
+///     Err(e) => println!("Validation failed: {}", e)
+/// }
+/// ```
 fn config_validation(path: String) -> Result<String> {
     debug!("Validating config file");
     
