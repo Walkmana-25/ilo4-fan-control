@@ -40,7 +40,7 @@ pub fn config_check(path: String) -> Result<String> {
             debug!("TOML syntax validation passed");
         }
         Err(e) => {
-            error!("TOML syntax validation failed: {}", e);
+            debug!("TOML syntax validation failed: {}", e);
             
             return Err(Error::msg(format!("TOML syntax validation failed: {}", e)));
         }
@@ -51,8 +51,8 @@ pub fn config_check(path: String) -> Result<String> {
             Ok("Configuration validation passed".to_string())
         }
         Err(e) => {
-            error!("Configuration validation failed: {}", e);
-            Ok(format!("Configuration validation failed: {}", e))
+            debug!("Configuration validation failed: {}", e);
+            Err(Error::msg(format!("Configuration validation failed: {}", e)))
         }
     }
 }
