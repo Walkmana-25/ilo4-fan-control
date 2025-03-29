@@ -2,11 +2,10 @@ name: Rust Testing
 
 on:
   pull_request:
-    branches: [ main ]
   push:
     branches: [ main ]
   workflow_dispatch:
-  on_workflow_call:
+  workflow_call:
 
 env:
   CARGO_TERM_COLOR: always
