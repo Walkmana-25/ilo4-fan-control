@@ -60,7 +60,7 @@ pub fn generate_fan_commands(target: &TargetIlo, current_temp: u8) -> Vec<String
     // Generate commands for each fan
     match &target.target_fans {
         TargetFans::NumFans(count) => {
-            for fan_number in 1..=*count {
+            for fan_number in 0..=*count {
                 commands.push(format!("fan p {} max {}", fan_number, fan_speed));
             }
         }
