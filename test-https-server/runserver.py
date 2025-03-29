@@ -1,7 +1,7 @@
 import ssl
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-PORT = 443
+PORT = 8080
 CERTFILE = "./localhost.pem"
 
 Handler = SimpleHTTPRequestHandler
