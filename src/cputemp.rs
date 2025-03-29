@@ -4,8 +4,8 @@ use std::fmt::{self, write};
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {
-    cpuid: u8,
-    current: u8,
+    pub cpuid: u8,
+    pub current: u8,
 }
 
 impl fmt::Display for CpuTemp {
@@ -35,11 +35,11 @@ impl fmt::Display for Fan {
 
 #[derive(Debug, PartialEq)]
 pub struct TempData {
-    cpu_temps: Vec<CpuTemp>,
-    high_temp_critical_reached_component: bool,
-    high_temp_component_name: Vec<String>,
-    num_fans: u8,
-    fans: Vec<Fan>,
+    pub cpu_temps: Vec<CpuTemp>,
+    pub high_temp_critical_reached_component: bool,
+    pub high_temp_component_name: Vec<String>,
+    pub num_fans: u8,
+    pub fans: Vec<Fan>,
 }
 
 

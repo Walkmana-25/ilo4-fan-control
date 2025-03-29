@@ -7,6 +7,7 @@ use log::{
 use anyhow::Result;
 
 use crate::config::TargetIlo;
+use crate::cputemp;
 
 pub fn start_daemon(config_path: String) -> Result<()> {
     debug!("Starting daemon with config path: {}", config_path);
@@ -63,12 +64,30 @@ async fn daemon_main(config: crate::config::IloConfig) -> Result<()> {
     for handle in handles {
         handle.join().map_err(|_| anyhow::anyhow!("Thread panicked"))??;
     }
-    
+
+    info!("All hosts completed successfully");
     Ok(())
 }
 
 async fn runner(config: TargetIlo) -> Result<()> {
-    info!("Running control function");
+    let host = config.host.clone();
+    let user = config.user.clone();
+    let password = config.password.clone();
+    
+    info!("Fan controller for host: {}", &host);
+    debug!("User: {}", &user);
+    
+    // Get the current temperature
+    let temprature = cputemp::get_temp_data(
+        &host,
+        &user,
+        &password,
+    ).await?;
+    
+    
+    info!("Current CPU 0 Temp of {}: {:?}°C", &host, &temprature.cpu_temps[0].current);
+    debug!("Detail data of {}:\n {}", &host, &temprature);
+    
     
     
     Ok(())
