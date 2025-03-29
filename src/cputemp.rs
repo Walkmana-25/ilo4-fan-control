@@ -1302,7 +1302,7 @@ mod test {
 
         // Start the test server as a background process
         println!("Starting test HTTPS server...");
-        let server_dir = Path::new("/workspaces/ilo4-fan-control/test-https-server");
+        let server_dir = Path::new("./test-https-server");
         let mut server_process = Command::new("python3")
             .arg("runserver.py")
             .current_dir(server_dir)
