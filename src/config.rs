@@ -9,7 +9,7 @@ use anyhow::Result;
 /// 
 /// This structure represents the top-level configuration for controlling fans
 /// through the Integrated Lights-Out (ILO) interface.
-#[derive(Serialize, Deserialize, Debug, Validate)]
+#[derive(Serialize, Deserialize, Debug, Validate, Clone)]
 pub struct IloConfig {
     /// The period in seconds between fan control updates
     pub run_period_seconds: u8,
@@ -22,7 +22,7 @@ pub struct IloConfig {
 /// 
 /// This structure contains connection details and fan control settings
 /// for a specific ILO interface.
-#[derive(Serialize, Deserialize, Debug, Validate)]
+#[derive(Serialize, Deserialize, Debug, Validate, Clone)]
 pub struct TargetIlo {
     /// The hostname or IP address of the ILO interface
     pub host: String,
@@ -40,7 +40,7 @@ pub struct TargetIlo {
 /// Configuration for temperature-based fan control
 /// 
 /// Defines the fan speed settings for specific temperature ranges.
-#[derive(Serialize, Deserialize, Debug, Validate)]
+#[derive(Serialize, Deserialize, Debug, Validate, Clone)]
 pub struct FanConfig {
     /// Minimum temperature threshold in Celsius
     pub min_temp: u8,
@@ -54,7 +54,7 @@ pub struct FanConfig {
 /// Fan target specification
 /// 
 /// Specifies either the number of fans to control or specific fan indices.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TargetFans {
     /// Control a specific number of fans (starting from index 0)
     NumFans(u8),
