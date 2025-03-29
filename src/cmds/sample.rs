@@ -1,13 +1,5 @@
-use log::{
-    info, error, debug
-};
-use crate::config::{
-    IloConfig,
-    TargetIlo,
-    TargetFans,
-    FanConfig
-};
-
+use crate::config::{FanConfig, IloConfig, TargetFans, TargetIlo};
+use log::{debug, error, info};
 
 pub fn show_sample(path: String, dual: bool) {
     let target_fans = TargetFans::NumFans(7);
@@ -39,13 +31,12 @@ pub fn show_sample(path: String, dual: bool) {
         password: String::from("PASSWORD"),
         target_fans: target_fans.clone(),
         temprature_fan_config: fan_config.clone(),
-        
     };
     let mut ilo_config = IloConfig {
         run_period_seconds: 60,
         targets: vec![target_ilo],
     };
-    
+
     if dual {
         let target_ilo2 = TargetIlo {
             host: String::from("ILO_HOST2_NAME_OR_IP_ADDRESS"),
@@ -56,9 +47,8 @@ pub fn show_sample(path: String, dual: bool) {
         };
         ilo_config.targets.push(target_ilo2);
     }
-    
+
     debug!("Generated Sample Config: {:?}", ilo_config);
-    
 
     // Save the sample configuration to a file
     match ilo_config.save_to_toml_file(&path) {

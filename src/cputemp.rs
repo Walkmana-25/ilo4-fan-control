@@ -24,11 +24,9 @@ pub struct Fan {
 impl fmt::Display for Fan {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
-            f, 
-            "{}:\t{}%,\tStatus:\t{}", 
-            self.name, 
-            self.current, 
-            self.status
+            f,
+            "{}:\t{}%,\tStatus:\t{}",
+            self.name, self.current, self.status
         )
     }
 }
@@ -42,32 +40,35 @@ pub struct TempData {
     pub fans: Vec<Fan>,
 }
 
-
 impl fmt::Display for TempData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
-            f, 
-            "System Temperature Status: {}", 
-            if self.high_temp_critical_reached_component { "CRITICAL" } else { "Normal" }
+            f,
+            "System Temperature Status: {}",
+            if self.high_temp_critical_reached_component {
+                "CRITICAL"
+            } else {
+                "Normal"
+            }
         )?;
-        
+
         if self.high_temp_critical_reached_component {
             writeln!(f, "Critical components:")?;
             for component in &self.high_temp_component_name {
                 writeln!(f, " - {}", component)?;
             }
         }
-        
+
         writeln!(f, "\nCPU Temperatures:")?;
         for cpu in &self.cpu_temps {
             writeln!(f, " - {}", cpu)?;
         }
-        
+
         writeln!(f, "\nFan Status (Count: {}):", self.num_fans)?;
         for fan in &self.fans {
             writeln!(f, " - {}", fan)?;
         }
-        
+
         Ok(())
     }
 }
@@ -101,17 +102,17 @@ pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<
 /// This function creates an HTTPS client that accepts self-signed certificates
 /// and makes a GET request to the specified URL.
 async fn get_ilo_data(url: &str, user: &str, password: &str) -> Result<String> {
-  let client = reqwest::Client::builder()
-    .danger_accept_invalid_certs(true)
-    .build()?;
-  let resp = client.get(url)
-    .basic_auth(user, Some(password))
-    .send()
-    .await?
-    .text()
-    .await?;
-  Ok(resp)
-
+    let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()?;
+    let resp = client
+        .get(url)
+        .basic_auth(user, Some(password))
+        .send()
+        .await?
+        .text()
+        .await?;
+    Ok(resp)
 }
 
 /// Parses JSON response from ILO into TempData structure
@@ -165,12 +166,10 @@ fn json_parser(json: &str) -> Result<TempData> {
                     None => {
                         return Err(anyhow::anyhow!("No status found"));
                     }
-                    Some(status) => status.get("Health").
-                                      unwrap_or_else(
-                                        || {
-                                          status.get("State").unwrap_or(&unknown)
-                                        }
-                                      ).as_str()
+                    Some(status) => status
+                        .get("Health")
+                        .unwrap_or_else(|| status.get("State").unwrap_or(&unknown))
+                        .as_str(),
                 };
                 debug!("Fan status: {:?}", status);
                 let fan = Fan {
@@ -1220,89 +1219,86 @@ mod test {
 }
 
 "###;
-use super::*;
+    use super::*;
 
     #[test]
     fn test_json_parser() {
         let result = super::json_parser(ILO_JSON);
         assert!(result.is_ok());
-
     }
-    
+
     #[test]
     fn test_json_parser_result() {
-      let result = super::json_parser(ILO_JSON);
-      
-      let cpu_temps: Vec<super::CpuTemp> = vec![
-        super::CpuTemp {
-          cpuid: 1,
-          current: 44,
-        },
-        super::CpuTemp {
-          cpuid: 2,
-          current: 47,
-        },
-      ];
-      
-      let fans: Vec<super::Fan> = vec![
-        super::Fan {
-          current: 11,
-          name: "Fan 1".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 2".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 3".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 4".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 5".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 6".to_string(),
-          status: "OK".to_string(),
-        },
-        super::Fan {
-          current: 11,
-          name: "Fan 7".to_string(),
-          status: "OK".to_string(),
-        },
-      ];
-      
-      let temp_data: super::TempData = super::TempData {
-        cpu_temps,
-        high_temp_critical_reached_component: false,
-        high_temp_component_name: vec![],
-        num_fans: 7,
-        fans,
-      };
-      println!("temp_data: {:#?}", temp_data);
-      println!("Result_data: {:#?}", result.as_ref().unwrap());
+        let result = super::json_parser(ILO_JSON);
 
-      
-      assert_eq!(result.unwrap(), temp_data);
-      
+        let cpu_temps: Vec<super::CpuTemp> = vec![
+            super::CpuTemp {
+                cpuid: 1,
+                current: 44,
+            },
+            super::CpuTemp {
+                cpuid: 2,
+                current: 47,
+            },
+        ];
+
+        let fans: Vec<super::Fan> = vec![
+            super::Fan {
+                current: 11,
+                name: "Fan 1".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 2".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 3".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 4".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 5".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 6".to_string(),
+                status: "OK".to_string(),
+            },
+            super::Fan {
+                current: 11,
+                name: "Fan 7".to_string(),
+                status: "OK".to_string(),
+            },
+        ];
+
+        let temp_data: super::TempData = super::TempData {
+            cpu_temps,
+            high_temp_critical_reached_component: false,
+            high_temp_component_name: vec![],
+            num_fans: 7,
+            fans,
+        };
+        println!("temp_data: {:#?}", temp_data);
+        println!("Result_data: {:#?}", result.as_ref().unwrap());
+
+        assert_eq!(result.unwrap(), temp_data);
     }
-    
+
     #[tokio::test]
     async fn test_async_function() {
+        use std::path::Path;
         use std::process::Command;
         use std::thread::sleep;
         use std::time::Duration;
-        use std::path::Path;
 
         // Start the test server as a background process
         println!("Starting test HTTPS server...");
@@ -1315,17 +1311,20 @@ use super::*;
 
         // Give the server a moment to start
         sleep(Duration::from_secs(2));
-        
+
         // Run the actual test
         let result = get_ilo_data("https://localhost", "user", "pass").await;
         println!("Result: {:#?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");
-        
+
         // Clean up: kill the server process and wait for it to finish
-        server_process.kill().expect("Failed to kill server process");
-        server_process.wait().expect("Failed to wait for server process");
+        server_process
+            .kill()
+            .expect("Failed to kill server process");
+        server_process
+            .wait()
+            .expect("Failed to wait for server process");
         println!("Test server stopped");
     }
-    
 }

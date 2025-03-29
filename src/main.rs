@@ -1,18 +1,18 @@
-use std::process;
-use clap::{Parser, Subcommand};
-use log::{info, error};
 use anyhow::Result;
+use clap::{Parser, Subcommand};
+use log::{error, info};
+use std::process;
 
-mod ssh;
-mod cputemp;
-mod config;
-mod gen_ssh;
 mod cmds;
+mod config;
+mod cputemp;
+mod gen_ssh;
+mod ssh;
 
 /// HPE iLO4 Fan Control Utility
 ///
 /// Command line interface for controlling fan speeds on HPE servers through
-/// their iLO4 management interface. Supports automatic temperature-based 
+/// their iLO4 management interface. Supports automatic temperature-based
 /// fan speed control.
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -20,7 +20,7 @@ struct Cli {
     /// Set the log level for the application
     #[arg(short, long, default_value = "info")]
     log_level: String,
-    
+
     /// iLO4 host address
     #[arg(long)]
     host: Option<String>,
@@ -49,19 +49,18 @@ enum Commands {
         /// Path to the target configuration file
         #[arg(short, long)]
         path: String,
-        
+
         /// Generate sample configuration file
         #[arg(short, long)]
         sample: bool,
-        
+
         /// Validate the configuration file against the IloConfig schema
         #[arg(short, long)]
         validate: bool,
-        
+
         /// Enable dual iLO configuration
         #[arg(short, long)]
         dual: bool,
-        
     },
 
     /// Daemon mode for continuous monitoring and control
@@ -69,8 +68,7 @@ enum Commands {
         /// Path to the configuration file
         #[arg(short, long)]
         path: String,
-        
-    }
+    },
 }
 
 /// Main entry point for the fan control application
@@ -88,13 +86,14 @@ fn main() -> Result<()> {
 
     match &cli.command {
         Commands::Status => {
-            cmds::status::show_status(
-                cli.host.clone(),
-                cli.user.clone(),
-                cli.password.clone(),
-            );
+            cmds::status::show_status(cli.host.clone(), cli.user.clone(), cli.password.clone());
         }
-        Commands::Config { path, sample, validate, dual } => {
+        Commands::Config {
+            path,
+            sample,
+            validate,
+            dual,
+        } => {
             if *sample && *validate {
                 error!("Please use only one of --sample, --validate at a time");
                 process::exit(1);
@@ -113,9 +112,9 @@ fn main() -> Result<()> {
             } else {
                 error!("Please specify --sample or --validate");
                 process::exit(1);
-            }   
+            }
         }
-        
+
         Commands::Daemon { path } => {
             info!("Starting daemon with config path: {}", path);
             // Daemon logic here
