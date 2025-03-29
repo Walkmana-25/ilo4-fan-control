@@ -31,9 +31,10 @@ jobs:
   check:
     name: Rustfmt
     runs-on: ubuntu-latest
+    container:
+      image: rust:latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Rust
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run rustfmt
