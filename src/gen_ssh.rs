@@ -60,13 +60,13 @@ pub fn generate_fan_commands(target: &TargetIlo, current_temp: u8) -> Vec<String
     // Generate commands for each fan
     match &target.target_fans {
         TargetFans::NumFans(count) => {
-            for fan_number in 0..=*count {
+            for fan_number in 0..=*count - 1 {
                 commands.push(format!("fan p {} max {}", fan_number, fan_speed));
             }
         }
         TargetFans::TargetFans(fans) => {
             for &fan_number in fans {
-                commands.push(format!("fan p {} max {}", fan_number, fan_speed));
+                commands.push(format!("fan p {} max {}", fan_number - 1, fan_speed));
             }
         }
     }
@@ -118,23 +118,23 @@ mod tests {
             3,
             "3つのファンコマンドが生成されるべき"
         );
-        assert_eq!(low_temp_commands[0], "fan p 1 max 128");
-        assert_eq!(low_temp_commands[1], "fan p 2 max 128");
-        assert_eq!(low_temp_commands[2], "fan p 3 max 128");
+        assert_eq!(low_temp_commands[0], "fan p 0 max 128");
+        assert_eq!(low_temp_commands[1], "fan p 1 max 128");
+        assert_eq!(low_temp_commands[2], "fan p 2 max 128");
 
         // 中温域でのテスト (31-60℃)
         let mid_temp_commands = generate_fan_commands(&target, 45);
         assert_eq!(mid_temp_commands.len(), 3);
-        assert_eq!(mid_temp_commands[0], "fan p 1 max 191");
-        assert_eq!(mid_temp_commands[1], "fan p 2 max 191");
-        assert_eq!(mid_temp_commands[2], "fan p 3 max 191");
+        assert_eq!(mid_temp_commands[0], "fan p 0 max 191");
+        assert_eq!(mid_temp_commands[1], "fan p 1 max 191");
+        assert_eq!(mid_temp_commands[2], "fan p 2 max 191");
 
         // 高温域でのテスト (61-85℃)
         let high_temp_commands = generate_fan_commands(&target, 70);
         assert_eq!(high_temp_commands.len(), 3);
-        assert_eq!(high_temp_commands[0], "fan p 1 max 255");
-        assert_eq!(high_temp_commands[1], "fan p 2 max 255");
-        assert_eq!(high_temp_commands[2], "fan p 3 max 255");
+        assert_eq!(high_temp_commands[0], "fan p 0 max 255");
+        assert_eq!(high_temp_commands[1], "fan p 1 max 255");
+        assert_eq!(high_temp_commands[2], "fan p 2 max 255");
     }
 
     #[test]
@@ -145,9 +145,9 @@ mod tests {
         // 中温域でのテスト
         let commands = generate_fan_commands(&target, 45);
         assert_eq!(commands.len(), 3, "3つのファンコマンドが生成されるべき");
-        assert_eq!(commands[0], "fan p 1 max 191");
-        assert_eq!(commands[1], "fan p 3 max 191");
-        assert_eq!(commands[2], "fan p 5 max 191");
+        assert_eq!(commands[0], "fan p 0 max 191");
+        assert_eq!(commands[1], "fan p 2 max 191");
+        assert_eq!(commands[2], "fan p 4 max 191");
     }
 
     #[test]
@@ -223,7 +223,7 @@ mod tests {
             let commands = generate_fan_commands(&target, 50); // Use a temperature in the valid range
 
             assert_eq!(commands.len(), 1);
-            assert_eq!(commands[0], format!("fan p 1 max {}", expected));
+            assert_eq!(commands[0], format!("fan p 0 max {}", expected));
         }
     }
 }
