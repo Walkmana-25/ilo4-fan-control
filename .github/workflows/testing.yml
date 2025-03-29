@@ -17,7 +17,7 @@ jobs:
     needs: ["check"]
     steps:
       - name: Preparing test
-        run: "sudo apt-get update && sudo apt-get install ssh adduser sed python3 -y && sudo sed -i 's/^Port 2222$/Port 22/' /etc/ssh/sshd_config && sudo service ssh start && sudo service ssh reload && sudo useradd -m test && printf \'password\\npassword\\n\' | passwd test"
+        run: "sudo apt-get update && sudo apt-get install ssh adduser sed python3 -y && sudo sed -i 's/^Port 2222$/Port 22/' /etc/ssh/sshd_config && sudo service ssh start && sudo service ssh reload && sudo useradd -m test && printf \'password\\npassword\\n\' | sudo passwd test"
       - uses: actions/checkout@v3
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
