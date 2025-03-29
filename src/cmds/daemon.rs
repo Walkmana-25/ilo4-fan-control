@@ -8,6 +8,7 @@ use anyhow::Result;
 
 use crate::config::TargetIlo;
 use crate::cputemp;
+use crate::ssh;
 
 pub fn start_daemon(config_path: String) -> Result<()> {
     debug!("Starting daemon with config path: {}", config_path);
@@ -34,7 +35,6 @@ pub fn start_daemon(config_path: String) -> Result<()> {
     let rt = tokio::runtime::Runtime::new()?;
     loop {
         // Run the control function
-        info!("Running control function");
         rt.block_on(daemon_main(config.clone()))?;
         
         // Sleep for the specified interval
@@ -88,7 +88,44 @@ async fn runner(config: TargetIlo) -> Result<()> {
     info!("Current CPU 0 Temp of {}: {:?}°C", &host, &temprature.cpu_temps[0].current);
     debug!("Detail data of {}:\n {}", &host, &temprature);
     
+    let mut max_cpu_temp = 0;
     
+    temprature.cpu_temps.iter().for_each(|temp| {
+        if temp.current > max_cpu_temp {
+            max_cpu_temp = temp.current;
+        }
+    });
+    
+    // Generate fan commands based on the current temperature
+    let commands = crate::gen_ssh::generate_fan_commands(&config, max_cpu_temp);
+    debug!("Fan control commands for {}: {:?}", &host, &commands);
+    
+    // Execute the fan control commands
+    let mut client = ssh::SshClient::new(
+        host.clone(),
+        user,
+        password,
+    );
+    match client.connect() {
+        Ok(_) => {
+            debug!("Connected to {}", &host);
+        }
+        Err(e) => {
+            error!("Failed to connect to {}: {}", &host, e);
+            return Err(e);
+        }
+    }
+    
+    match client.exec(commands) {
+        Ok(output) => {
+            debug!("Fan control output for {}: {:?}", &host, output);
+        }
+        Err(e) => {
+            error!("Failed to execute commands on {}: {}", &host, e);
+            return Err(e);
+        }
+    }
+
     
     Ok(())
 }
