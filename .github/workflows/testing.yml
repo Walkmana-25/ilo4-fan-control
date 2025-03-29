@@ -5,8 +5,8 @@ on:
     branches: [ main ]
   push:
     branches: [ main ]
-    tags: [ v*.*.* ]
   workflow_dispatch:
+  on_workflow_call:
 
 env:
   CARGO_TERM_COLOR: always
