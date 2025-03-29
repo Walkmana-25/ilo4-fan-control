@@ -1,6 +1,6 @@
 use anyhow::Result;
 use log::{debug, info};
-use std::fmt::{self, write};
+use std::fmt::{self};
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {

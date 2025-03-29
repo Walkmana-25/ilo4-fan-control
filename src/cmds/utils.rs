@@ -1,8 +1,6 @@
 
 use dialoguer::{Input, Password};
-use log::{
-    info, error, debug
-};
+use log::debug;
 
 pub fn get_connection_info(host: Option<String>, user: Option<String>, password: Option<String>) -> (String, String, String) {
     debug!("Getting connection info");

@@ -2,7 +2,6 @@
 use log::{
     info, error, debug
 };
-use serde::de;
 use tokio::runtime::Runtime;
 
 pub fn show_status(host: Option<String>, user: Option<String>, password: Option<String>) {
