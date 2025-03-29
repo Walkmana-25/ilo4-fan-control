@@ -58,6 +58,10 @@ enum Commands {
         #[arg(short, long)]
         validate: bool,
         
+        /// Enable dual iLO configuration
+        #[arg(short, long)]
+        dual: bool,
+        
     },
 
     /// Daemon mode for continuous monitoring and control
@@ -90,12 +94,12 @@ fn main() -> Result<()> {
                 cli.password.clone(),
             );
         }
-        Commands::Config { path, sample, validate } => {
+        Commands::Config { path, sample, validate, dual } => {
             if *sample && *validate {
                 error!("Please use only one of --sample, --validate at a time");
                 process::exit(1);
             } else if *sample {
-                cmds::sample::show_sample(path.clone());
+                cmds::sample::show_sample(path.clone(), *dual);
             } else if *validate {
                 match cmds::config::config_check(path.clone()) {
                     Ok(_) => {
