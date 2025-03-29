@@ -64,7 +64,7 @@ enum Commands {
     Daemon {
         /// Path to the configuration file
         #[arg(short, long)]
-        config_path: String,
+        path: String,
         
     }
 }
@@ -112,11 +112,20 @@ fn main() -> Result<()> {
             }   
         }
         
-        Commands::Daemon { config_path } => {
-            info!("Starting daemon with config path: {}", config_path);
+        Commands::Daemon { path } => {
+            info!("Starting daemon with config path: {}", path);
             // Daemon logic here
             // For example, you can call a function to start the daemon
             // cmds::daemon::start_daemon(config_path.clone());
+            match cmds::daemon::start_daemon(path.clone()) {
+                Ok(_) => {
+                    info!("Daemon ended successfully");
+                }
+                Err(e) => {
+                    error!("Failed to start daemon: {}", e);
+                    process::exit(1);
+                }
+            }
         }
     }
 
