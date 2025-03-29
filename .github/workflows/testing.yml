@@ -17,7 +17,7 @@ jobs:
     needs: ["check"]
     steps:
       - name: Preparing test
-        run: sudo apt update && sudo apt install ssh && sudo sed -i 's/^Port 2222$/Port 22/' /etc/ssh/sshd_config && sudo service ssh reload && sudo useradd -m test && printf \"password\\npassword\\n\" | sudo passwd test
+        run: sudo apt update && sudo apt install ssh && sudo sed -i 's/^Port 2222$/Port 22/' /etc/ssh/sshd_config && sudo service start && sudo service ssh reload && sudo useradd -m test && printf \"password\\npassword\\n\" | sudo passwd test
       - uses: actions/checkout@v3
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
