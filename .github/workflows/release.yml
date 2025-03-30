@@ -17,17 +17,39 @@ jobs:
 
   build:
     needs: [Test]  # Wait for the tests to succeed
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.job.runner }}
     strategy:
       fail-fast: false
       matrix:
         job:
-            - {"target": "x86_64-unknown-linux-gnu:centos", "extension": "", "target_name": "x86_64-unknown-linux-gnu:centos"}
-            - {"target": "x86_64-apple-darwin", "extension": "", "target_name": "x86_64-apple-darwin"}
-            - {"target": "x86_64-pc-windows-msvc", "extension": ".exe", "target_name": "x86_64-pc-windows-msvc"}
-            - {"target": "aarch64-apple-darwin", "extension": "", "target_name": "aarch64-apple-darwin"}
-            - {"target": "aarch64-unknown-linux-gnu:centos", "extension": "", "target_name": "aarch64-unknown-linux-gnu:centos"}
-            - {"target": "armv7-unknown-linux-gnueabihf", "extension": "", "target_name": "armv7-unknown-linux-gnueabihf"}
+            - target: x86_64-unknown-linux-gnu
+              extension: ""
+              runner: ubuntu-latest
+              cross: true
+            - target: x86_64-pc-windows-msvc
+              extension: ".exe"
+              runner: windows-latest
+              cross: false
+            - target: x86_64-apple-darwin
+              extension: ""
+              runner: macos-latest
+              cross: false
+            - target: aarch64-unknown-linux-gnu
+              extension: ""
+              runner: ubuntu-latest
+              cross: true
+            - target: aarch64-pc-windows-msvc
+              extension: ".exe"
+              runner: windows-latest
+              cross: false
+            - target: aarch64-apple-darwin
+              extension: ""
+              runner: macos-latest
+              cross: false
+            - target: armv7-unknown-linux-gnueabihf
+              extension: ""
+              runner: ubuntu-latest
+              cross: true
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,11 +62,22 @@ jobs:
           
       # Install Cross
       - name: Install cross
+        if: ${{ matrix.job.cross }}
         run: cargo install cross --git https://github.com/cross-rs/cross
         
       # Build the project
-      - name: Build
+      - name: Build by cross
+        if: ${{ matrix.job.cross }}
         run: cross build --release --target ${{ matrix.job.target }} --verbose
+        
+      # Install Target
+      - name: Install target
+        if: ${{ !matrix.job.cross }}
+        run: rustup target add ${{ matrix.job.target }}
+      # Build the project without cross
+      - name: Build
+        if: ${{ !matrix.job.cross }}
+        run: cargo build --release --target ${{ matrix.job.target }} --verbose
 
       # ビルド済みバイナリをリネーム
       - name: Rename artifacts
@@ -59,4 +92,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}-${{ github.ref_name }}-${{ matrix.job.target_name }}${{ matrix.job.extension }}
+            target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}-${{ github.ref_name }}-${{ matrix.job.target }}${{ matrix.job.extension }}
