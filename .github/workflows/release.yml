@@ -18,6 +18,8 @@ jobs:
   build:
     needs: [Test]  # Wait for the tests to succeed
     runs-on: ${{ matrix.job.runner }}
+    env:
+        PROJECT_NAME: fctrl
     strategy:
       fail-fast: false
       matrix:
@@ -53,12 +55,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      # Get the package name from Cargo.toml and set it as an environment variablea
-      - name: Extract crate information
-        shell: bash
-        run: |
-          echo "fctrl" >> $GITHUB_ENV
           
       # Install Winget
       - name: Install winget
