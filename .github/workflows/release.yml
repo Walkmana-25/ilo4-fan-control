@@ -58,8 +58,12 @@ jobs:
       - name: Extract crate information
         shell: bash
         run: |
-          echo "PROJECT_NAME=$(sed -n 's/^name = "\(.*\)"/\1/p' Cargo.toml | head -n1)" >> $GITHUB_ENV
+          echo "fctrl" >> $GITHUB_ENV
           
+      # Install Winget
+      - name: Install winget
+        if: ${{  matrix.job.runner == 'windows-latest' }}
+        uses: Cyberboss/install-winget@v1
       # Install Deps on windows
       - name: Install Deps on windows
         if: ${{  matrix.job.runner == 'windows-latest' }}
