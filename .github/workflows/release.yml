@@ -56,24 +56,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
           
-      # Install Winget
-      - name: Install winget
-        if: ${{  matrix.job.runner == 'windows-latest' }}
-        uses: Cyberboss/install-winget@v1
       # Install Deps on windows
       - name: Install Deps on windows
         if: ${{  matrix.job.runner == 'windows-latest' }}
         run: |
-            winget install -e --id GnuWin32.Make
-            winget install -e --id StrawberryPerl.StrawberryPerl
-            winget install --scope machine Microsoft.VisualStudio.2022.BuildTools 
+            choco install make --yes
       
       # Install Deps on macos
       - name: Install Deps on macos
         if: ${{  matrix.job.runner == 'macos-latest' }}
         run: |
             brew install make
-            brew install perl
           
       # Install Cross
       - name: Install cross
