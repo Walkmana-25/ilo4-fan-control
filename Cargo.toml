@@ -21,7 +21,6 @@ log = "0.4"
 env_logger = "0.10"
 ssh2 = "0.9.5"
 pkg-config = "0.3.32"
-openssl-sys = "0.9.106"
 serde_json = "1.0.140"
 tokio = { version = "1.44.1", features = ["full"] }
 reqwest = { version = "0.12.14", features = ["json"] }
@@ -29,6 +28,8 @@ serde = { version = "1.0.219", features = ["derive"] }
 validator = { version = "0.20.0", features = ["derive"] }
 toml = "0.8.20"
 dialoguer = "0.11.0"
+openssl-sys = "0.9.106"
+openssl = { version = "0.10.71", features = ["vendored"] }
 
 [dev-dependencies]
 tempfile = "3.10.1"
