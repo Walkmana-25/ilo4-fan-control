@@ -1,0 +1,57 @@
+# ILO4 Fan Control Configuration File
+# This file defines the fan control settings for HPE iLO4 servers
+
+# Fan control update interval (in seconds)
+# Increasing this value reduces system load, decreasing it improves responsiveness
+run_period_seconds = 60
+
+# iLO server settings
+# You can define multiple blocks like this to control multiple servers
+[[targets]]
+# iLO hostname or IP address
+host = "ILO_HOST_NAME_OR_IP_ADDRESS"
+# iLO authentication username
+user = "USERNAME"
+# iLO authentication password
+password = "PASSWORD"
+
+# Fan settings
+# NumFans specifies the number of fans in the server (indexed from 0)
+[targets.target_fans]
+NumFans = 7
+
+# Temperature-based fan speed settings
+# Different fan speeds can be set for different temperature ranges
+# Temperature is determined based on the maximum CPU temperature
+# You can add as many temperature range configurations as needed for precise control
+# Make sure temperature ranges don't overlap and cover your expected operating range
+
+# Low temperature range settings (0-55°C)
+[[targets.temperature_fan_config]]
+# Minimum temperature (Celsius)
+min_temp = 0
+# Maximum temperature (Celsius)
+max_temp = 55
+# Maximum fan speed (%) - Set low for quiet operation
+max_fan_speed = 20
+
+# Medium temperature range settings (55-60°C)
+[[targets.temperature_fan_config]]
+min_temp = 55
+max_temp = 60
+# Increase fan speed as needed
+max_fan_speed = 40
+
+# High temperature range settings (61-70°C)
+[[targets.temperature_fan_config]]
+min_temp = 61
+max_temp = 70
+# Set fan speed higher for cooling under heavy load
+max_fan_speed = 70
+
+# Extreme temperature range settings (71-100°C)
+[[targets.temperature_fan_config]]
+min_temp = 71
+max_temp = 100
+# Set to maximum speed for maximum cooling
+max_fan_speed = 100
