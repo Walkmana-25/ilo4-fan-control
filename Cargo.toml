@@ -1,9 +1,9 @@
 [package]
 name = "ilo4-fan-control"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2021"
-description = "HP iLO4サーバー用ファン制御ユーティリティ"
-authors = ["Your Name <your.email@example.com>"]
+description = "A Rust CLI tool for controlling fan speeds on HPE iLO4 servers"
+authors = ["Yuuta Takahashi <y.highbridge04@gmail.com>"]
 
 # Add library target to enable doc tests
 [lib]
