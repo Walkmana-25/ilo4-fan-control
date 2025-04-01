@@ -324,3 +324,10 @@ You can validate your configuration file using:
 fctrl config -p /path/to/config.toml -v
 ```
 
+## Contributing
+
+Bug reports and feature requests are welcome on the [Issues](https://github.com/walkmana-25/ilo4-fan-control/issues) page. Pull requests are also appreciated.
+
+## License
+
+ilo4-fan-control is licensed under the Apache License, Version 2.0 (the "License").
