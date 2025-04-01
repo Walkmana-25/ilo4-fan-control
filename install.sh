@@ -24,8 +24,8 @@ get_system_info() {
     # Detect OS
     OS="$(uname -s)"
     case "${OS}" in
-        Linux*)     OS="linux";;
-        Darwin*)    OS="apple-darwin";;
+        Linux*)     OS="linux"; IS_LINUX=true;;
+        Darwin*)    OS="apple-darwin"; IS_LINUX=false;;
         *)          echo -e "${RED}Unsupported operating system: ${OS}${NC}"; exit 1;;
     esac
     
@@ -172,6 +172,50 @@ setup_config() {
     fi
 }
 
+# Setup systemd service for auto-start (Linux only)
+setup_systemd() {
+    if [ "$IS_LINUX" = true ]; then
+        echo -e "${BLUE}Setting up systemd service...${NC}"
+        
+        # Download systemd service file from repository or use local file if available
+        SYSTEMD_SERVICE_PATH="/etc/systemd/system/ilo4-fan-control.service"
+        
+        # Check if we can write to the systemd directory
+        if [ -w "/etc/systemd/system" ]; then
+            # Download or copy the service file
+            SERVICE_FILE_URL="https://raw.githubusercontent.com/${REPO}/main/ilo4-fan-control.service"
+            
+            if [ -f "./ilo4-fan-control.service" ]; then
+                echo -e "${BLUE}Using local systemd service file${NC}"
+                cp "./ilo4-fan-control.service" "$SYSTEMD_SERVICE_PATH"
+            else
+                echo -e "${BLUE}Downloading systemd service file from ${SERVICE_FILE_URL}...${NC}"
+                if command -v curl &> /dev/null; then
+                    curl -L -o "$SYSTEMD_SERVICE_PATH" "$SERVICE_FILE_URL"
+                elif command -v wget &> /dev/null; then
+                    wget -O "$SYSTEMD_SERVICE_PATH" "$SERVICE_FILE_URL"
+                else
+                    echo -e "${YELLOW}Unable to download systemd service file. Skipping systemd setup.${NC}"
+                    return
+                fi
+            fi
+            
+            # Reload systemd to recognize the new service file
+            systemctl daemon-reload
+            
+            echo -e "${GREEN}Systemd service installed at ${SYSTEMD_SERVICE_PATH}${NC}"
+            echo -e "${YELLOW}To enable and start the service, run:${NC}"
+            echo -e "  ${YELLOW}sudo systemctl enable --now ilo4-fan-control.service${NC}"
+        else
+            echo -e "${YELLOW}No write permission to /etc/systemd/system. Skipping systemd setup.${NC}"
+            echo -e "${YELLOW}To manually set up systemd service, run:${NC}"
+            echo -e "  ${YELLOW}sudo cp ./ilo4-fan-control.service /etc/systemd/system/${NC}"
+            echo -e "  ${YELLOW}sudo systemctl daemon-reload${NC}"
+            echo -e "  ${YELLOW}sudo systemctl enable --now ilo4-fan-control.service${NC}"
+        fi
+    fi
+}
+
 # Print usage instructions
 print_usage() {
     echo -e "\n${BLUE}Usage Instructions:${NC}"
@@ -183,6 +227,16 @@ print_usage() {
     echo -e "    fctrl config -p config.toml -v\n"
     echo -e "  ${YELLOW}Run daemon mode:${NC}"
     echo -e "    fctrl daemon -p config.toml\n"
+    
+    # Add systemd instructions for Linux
+    if [ "$IS_LINUX" = true ]; then
+        echo -e "  ${YELLOW}Control systemd service (Linux):${NC}"
+        echo -e "    sudo systemctl start ilo4-fan-control.service   # Start the service"
+        echo -e "    sudo systemctl stop ilo4-fan-control.service    # Stop the service"
+        echo -e "    sudo systemctl restart ilo4-fan-control.service # Restart the service"
+        echo -e "    sudo systemctl status ilo4-fan-control.service  # Check service status\n"
+    fi
+    
     echo -e "For more information, run: fctrl --help"
 }
 
@@ -193,6 +247,7 @@ main() {
     download_binary
     install_binary
     setup_config
+    setup_systemd
     print_usage
     
     echo -e "\n${GREEN}Installation completed successfully!${NC}"

@@ -187,6 +187,52 @@ Run in continuous monitoring and control mode:
 fctrl daemon -p config.toml
 ```
 
+### Automatic Startup with Systemd (Linux only)
+
+On Linux systems, the installation script will set up a systemd service for automatic startup. This allows ilo4-fan-control to run automatically at boot and continue monitoring your server.
+
+To enable and start the service after installation:
+
+```sh
+sudo systemctl enable --now ilo4-fan-control.service
+```
+
+Available systemd commands:
+
+```sh
+# Start the service
+sudo systemctl start ilo4-fan-control.service
+
+# Stop the service
+sudo systemctl stop ilo4-fan-control.service
+
+# Restart the service
+sudo systemctl restart ilo4-fan-control.service
+
+# Check service status
+sudo systemctl status ilo4-fan-control.service
+
+# View logs
+sudo journalctl -u ilo4-fan-control.service
+```
+
+If you installed the software manually or need to set up the systemd service separately:
+
+1. Copy the systemd service file:
+   ```sh
+   sudo cp ilo4-fan-control.service /etc/systemd/system/
+   ```
+
+2. Reload systemd:
+   ```sh
+   sudo systemctl daemon-reload
+   ```
+
+3. Enable and start the service:
+   ```sh
+   sudo systemctl enable --now ilo4-fan-control.service
+   ```
+
 ## Configuration File
 
 The configuration file uses TOML format and allows you to precisely control fan behavior based on temperature ranges. Below is a detailed explanation of each configuration option:
