@@ -22,7 +22,7 @@ use crate::config::{TargetFans, TargetIlo};
 ///     password: String::from("password"),
 ///     
 ///     target_fans: TargetFans::NumFans(4),
-///     temprature_fan_config: vec![
+///     temperature_fan_config: vec![
 ///         FanConfig {
 ///             min_temp: 0,
 ///             max_temp: 30,
@@ -44,7 +44,7 @@ pub fn generate_fan_commands(target: &TargetIlo, current_temp: u8) -> Vec<String
 
     // Find the appropriate fan config based on current temperature
     let fan_config = target
-        .temprature_fan_config
+        .temperature_fan_config
         .iter()
         .find(|config| current_temp >= config.min_temp && current_temp <= config.max_temp);
 
@@ -86,7 +86,7 @@ mod tests {
             user: String::from("admin"),
             password: String::from("password"),
             target_fans: fan_type,
-            temprature_fan_config: vec![
+            temperature_fan_config: vec![
                 FanConfig {
                     min_temp: 0,
                     max_temp: 30,
@@ -169,7 +169,7 @@ mod tests {
             user: String::from("admin"),
             password: String::from("password"),
             target_fans: TargetFans::NumFans(1),
-            temprature_fan_config: vec![
+            temperature_fan_config: vec![
                 FanConfig {
                     min_temp: 20,
                     max_temp: 30,
@@ -213,7 +213,7 @@ mod tests {
                 user: String::from("admin"),
                 password: String::from("password"),
                 target_fans: TargetFans::NumFans(1),
-                temprature_fan_config: vec![FanConfig {
+                temperature_fan_config: vec![FanConfig {
                     min_temp: 0,
                     max_temp: 100,
                     max_fan_speed: *percentage,

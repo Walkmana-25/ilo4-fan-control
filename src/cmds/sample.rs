@@ -30,7 +30,7 @@ pub fn show_sample(path: String, dual: bool) {
         user: String::from("USERNAME"),
         password: String::from("PASSWORD"),
         target_fans: target_fans.clone(),
-        temprature_fan_config: fan_config.clone(),
+        temperature_fan_config: fan_config.clone(),
     };
     let mut ilo_config = IloConfig {
         run_period_seconds: 60,
@@ -43,7 +43,7 @@ pub fn show_sample(path: String, dual: bool) {
             user: String::from("USERNAME"),
             password: String::from("PASSWORD"),
             target_fans,
-            temprature_fan_config: fan_config,
+            temperature_fan_config: fan_config,
         };
         ilo_config.targets.push(target_ilo2);
     }

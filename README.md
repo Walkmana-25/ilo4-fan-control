@@ -282,7 +282,7 @@ The core feature of ilo4-fan-control is defining temperature ranges and correspo
 
 ```toml
 # Temperature range configuration
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 # Minimum temperature threshold in Celsius
 min_temp = 0
 # Maximum temperature threshold in Celsius
@@ -291,17 +291,17 @@ max_temp = 55
 max_fan_speed = 20
 
 # Additional temperature ranges with different fan speeds
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 55
 max_temp = 60
 max_fan_speed = 40
 
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 61
 max_temp = 70
 max_fan_speed = 70
 
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 71
 max_temp = 100
 max_fan_speed = 100
@@ -332,7 +332,7 @@ password = "password123"
 [targets.target_fans]
 NumFans = 7
 
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 0
 max_temp = 55
 max_fan_speed = 20
@@ -347,7 +347,7 @@ password = "password456"
 [targets.target_fans]
 NumFans = 6  # Different server might have different number of fans
 
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 0
 max_temp = 50  # Different temperature thresholds
 max_fan_speed = 15  # Lower fan speeds for quieter operation

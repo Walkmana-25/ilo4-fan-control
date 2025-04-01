@@ -34,7 +34,7 @@ pub struct TargetIlo {
     pub target_fans: TargetFans,
     /// Temperature-based fan speed configuration
     #[validate(nested)]
-    pub temprature_fan_config: Vec<FanConfig>,
+    pub temperature_fan_config: Vec<FanConfig>,
 }
 
 /// Configuration for temperature-based fan control
@@ -139,7 +139,7 @@ mod tests {
                     user: "admin".to_string(),
                     password: "password123".to_string(),
                     target_fans: TargetFans::NumFans(3),
-                    temprature_fan_config: vec![
+                    temperature_fan_config: vec![
                         FanConfig {
                             min_temp: 30,
                             max_temp: 50,
@@ -157,7 +157,7 @@ mod tests {
                     user: "admin".to_string(),
                     password: "password456".to_string(),
                     target_fans: TargetFans::TargetFans(vec![1, 2]),
-                    temprature_fan_config: vec![
+                    temperature_fan_config: vec![
                         FanConfig {
                             min_temp: 25,
                             max_temp: 40,
@@ -191,7 +191,7 @@ mod tests {
     fn test_invalid_fan_speed_validation() {
         let mut config = create_valid_config();
         // Set an invalid fan speed above 100%
-        config.targets[0].temprature_fan_config[0].max_fan_speed = 120;
+        config.targets[0].temperature_fan_config[0].max_fan_speed = 120;
         assert!(config.validate().is_err());
     }
 
@@ -210,7 +210,7 @@ mod tests {
         assert_eq!(loaded_config.targets[0].user, config.targets[0].user);
 
         // Check if we correctly loaded the fan configuration
-        let first_target_fan_config = &loaded_config.targets[0].temprature_fan_config[0];
+        let first_target_fan_config = &loaded_config.targets[0].temperature_fan_config[0];
         assert_eq!(first_target_fan_config.min_temp, 30);
         assert_eq!(first_target_fan_config.max_temp, 50);
         assert_eq!(first_target_fan_config.max_fan_speed, 50);

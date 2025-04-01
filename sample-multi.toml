@@ -26,7 +26,7 @@ NumFans = 7
 # Make sure temperature ranges don't overlap and cover your expected operating range
 
 # Low temperature range settings (0-55°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 # Minimum temperature (Celsius)
 min_temp = 0
 # Maximum temperature (Celsius)
@@ -35,21 +35,21 @@ max_temp = 55
 max_fan_speed = 20
 
 # Medium temperature range settings (55-60°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 55
 max_temp = 60
 # Increase fan speed as needed
 max_fan_speed = 40
 
 # High temperature range settings (61-70°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 61
 max_temp = 70
 # Set fan speed higher for cooling under heavy load
 max_fan_speed = 70
 
 # Extreme temperature range settings (71-100°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 71
 max_temp = 100
 # Set to maximum speed for maximum cooling
@@ -76,25 +76,25 @@ NumFans = 7
 # Each server can have different number of temperature ranges as appropriate
 
 # Low temperature range settings (0-55°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 0
 max_temp = 55
 max_fan_speed = 20
 
 # Medium temperature range settings (55-60°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 55
 max_temp = 60
 max_fan_speed = 40
 
 # High temperature range settings (61-70°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 61
 max_temp = 70
 max_fan_speed = 70
 
 # Extreme temperature range settings (71-100°C)
-[[targets.temprature_fan_config]]
+[[targets.temperature_fan_config]]
 min_temp = 71
 max_temp = 100
 max_fan_speed = 100
