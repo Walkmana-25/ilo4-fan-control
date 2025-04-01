@@ -65,39 +65,11 @@ get_latest_version() {
     fi
     
     if [ -z "$VERSION" ]; then
-        # Try to extract version from Cargo.toml if available
-        if [ -f "./Cargo.toml" ]; then
-            CARGO_VERSION=$(grep -E '^version\s*=\s*"[^"]*"' ./Cargo.toml | head -1 | cut -d'"' -f2)
-            if [ -n "$CARGO_VERSION" ]; then
-                VERSION="v${CARGO_VERSION}"
-                echo -e "${YELLOW}Warning: Could not determine the latest version from GitHub API.${NC}"
-                echo -e "${YELLOW}Using version from Cargo.toml: ${VERSION}${NC}"
-            else
-                # If we can't get version from Cargo.toml either, try GitHub API directly for releases
-                echo -e "${YELLOW}Warning: Could not determine version from Cargo.toml.${NC}"
-                echo -e "${YELLOW}Attempting to fetch any available release...${NC}"
-                
-                if command -v curl &> /dev/null; then
-                    VERSION=$(curl -s "https://api.github.com/repos/${REPO}/releases" | 
-                              grep -o '"tag_name": "[^"]*' | 
-                              head -1 |
-                              cut -d'"' -f4)
-                elif command -v wget &> /dev/null; then
-                    VERSION=$(wget -qO- "https://api.github.com/repos/${REPO}/releases" | 
-                              grep -o '"tag_name": "[^"]*' | 
-                              head -1 |
-                              cut -d'"' -f4)
-                fi
-                
-                if [ -z "$VERSION" ]; then
-                    echo -e "${RED}Error: Could not determine any version. Using fallback version v2.0.0.${NC}"
-                    VERSION="v2.0.0"
-                fi
-            fi
-        else
-            echo -e "${RED}Error: Could not determine any version. Using fallback version v2.0.0.${NC}"
-            VERSION="v2.0.0"
-        fi
+        echo -e "${RED}Error: Could not determine the latest version from GitHub API.${NC}"
+        echo -e "${RED}Please check your internet connection and try again.${NC}"
+        echo -e "${RED}If the problem persists, the GitHub repository may not have any releases,${NC}"
+        echo -e "${RED}or there might be GitHub API rate limiting in effect.${NC}"
+        exit 2
     else
         echo -e "${GREEN}Latest version: ${VERSION}${NC}"
     fi
