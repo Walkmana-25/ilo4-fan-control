@@ -6,6 +6,7 @@ use log::{debug, error, info};
 use crate::config::TargetIlo;
 use crate::cputemp;
 use crate::ssh;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 
 pub fn start_daemon(config_path: String) -> Result<()> {
     debug!("Starting daemon with config path: {}", config_path);
@@ -68,9 +69,12 @@ async fn daemon_main(config: crate::config::IloConfig) -> Result<()> {
 }
 
 async fn runner(config: TargetIlo) -> Result<()> {
+    let password_base64 = config.password_base64.clone();
     let host = config.host.clone();
     let user = config.user.clone();
-    let password = config.password.clone();
+    
+    let password = STANDARD.decode(password_base64)?;
+    let password = String::from_utf8(password)?;
 
     info!("Fan controller for host: {}", &host);
     debug!("User: {}", &user);

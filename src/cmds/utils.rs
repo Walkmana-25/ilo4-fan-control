@@ -1,5 +1,6 @@
 use dialoguer::{Input, Password};
 use log::debug;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 
 pub fn get_connection_info(
     host: Option<String>,
@@ -35,7 +36,10 @@ pub fn get_connection_info(
             .with_prompt("Enter ilo password")
             .interact()
             .unwrap();
-        input
+        let decoded = STANDARD.decode(input).unwrap();
+        String::from_utf8(decoded).unwrap()
+
+
     });
     debug!("Host: {}", host);
     debug!("User: {}", user);

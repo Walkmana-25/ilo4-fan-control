@@ -28,8 +28,8 @@ pub struct TargetIlo {
     pub host: String,
     /// Username for ILO authentication
     pub user: String,
-    /// Password for ILO authentication
-    pub password: String,
+    /// Base64 encoded password for ILO authentication
+    pub password_base64: String,
     /// Fan control target configuration
     pub target_fans: TargetFans,
     /// Temperature-based fan speed configuration
@@ -129,15 +129,18 @@ mod tests {
     use super::*;
     use std::io::Write;
     use tempfile::NamedTempFile;
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
 
     fn create_valid_config() -> IloConfig {
+        let password_base64 = STANDARD.encode("password123");
+        let password_base64_456 = STANDARD.encode("password456");
         IloConfig {
             run_period_seconds: 60,
             targets: vec![
                 TargetIlo {
                     host: "192.168.1.100".to_string(),
                     user: "admin".to_string(),
-                    password: "password123".to_string(),
+                    password_base64,
                     target_fans: TargetFans::NumFans(3),
                     temperature_fan_config: vec![
                         FanConfig {
@@ -155,7 +158,7 @@ mod tests {
                 TargetIlo {
                     host: "192.168.1.101".to_string(),
                     user: "admin".to_string(),
-                    password: "password456".to_string(),
+                    password_base64: password_base64_456,
                     target_fans: TargetFans::TargetFans(vec![1, 2]),
                     temperature_fan_config: vec![
                         FanConfig {

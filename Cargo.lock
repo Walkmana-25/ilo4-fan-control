@@ -736,6 +736,7 @@ name = "ilo4-fan-control"
 version = "2.0.0"
 dependencies = [
  "anyhow",
+ "base64",
  "clap",
  "dialoguer",
  "env_logger",

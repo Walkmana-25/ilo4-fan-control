@@ -19,7 +19,7 @@ use crate::config::{TargetFans, TargetIlo};
 /// let target_ilo = TargetIlo {
 ///     host: String::from("example_host"), // Added host initialization
 ///     user: String::from("admin"),
-///     password: String::from("password"),
+///     password_base64: String::from("password_base64"),
 ///     
 ///     target_fans: TargetFans::NumFans(4),
 ///     temperature_fan_config: vec![
@@ -78,13 +78,16 @@ pub fn generate_fan_commands(target: &TargetIlo, current_temp: u8) -> Vec<String
 mod tests {
     use super::*;
     use crate::config::FanConfig;
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
 
     /// テスト用のTargetIloインスタンスを作成する補助関数
     fn create_test_target(fan_type: TargetFans) -> TargetIlo {
+        let password: String = STANDARD.encode("password123");
+
         TargetIlo {
             host: String::from("example.host.com"),
             user: String::from("admin"),
-            password: String::from("password"),
+            password_base64: password,
             target_fans: fan_type,
             temperature_fan_config: vec![
                 FanConfig {
@@ -110,6 +113,7 @@ mod tests {
     fn test_generate_fan_commands_num_fans() {
         // NumFans形式でのテスト
         let target = create_test_target(TargetFans::NumFans(3));
+        let password: String = STANDARD.encode("password123");
 
         // 低温域でのテスト (0-30℃)
         let low_temp_commands = generate_fan_commands(&target, 25);
@@ -154,6 +158,7 @@ mod tests {
     fn test_generate_fan_commands_out_of_range() {
         // 温度範囲外のケース
         let target = create_test_target(TargetFans::NumFans(2));
+        let password: String = STANDARD.encode("password123");
 
         // 設定された範囲よりも高温
         let high_out_commands = generate_fan_commands(&target, 90);
@@ -167,7 +172,7 @@ mod tests {
         let target_with_gap = TargetIlo {
             host: String::from("example.com"),
             user: String::from("admin"),
-            password: String::from("password"),
+            password_base64: password,
             target_fans: TargetFans::NumFans(1),
             temperature_fan_config: vec![
                 FanConfig {
@@ -207,11 +212,13 @@ mod tests {
             (100, 255), // 255
         ];
 
+        let password: String = STANDARD.encode("password123");
         for (percentage, expected) in test_cases.iter() {
+
             let target = TargetIlo {
                 host: String::from("example.com"),
                 user: String::from("admin"),
-                password: String::from("password"),
+                password_base64: password.clone(),
                 target_fans: TargetFans::NumFans(1),
                 temperature_fan_config: vec![FanConfig {
                     min_temp: 0,
