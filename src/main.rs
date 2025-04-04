@@ -27,7 +27,7 @@ struct Cli {
     /// iLO4 username
     #[arg(long)]
     user: Option<String>,
-    /// iLO4 password
+    /// iLO4 base64 encoded password
     #[arg(long)]
     password: Option<String>, // Changed to Option<String>
 

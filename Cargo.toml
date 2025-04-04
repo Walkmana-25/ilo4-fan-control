@@ -30,6 +30,7 @@ toml = "0.8.20"
 dialoguer = "0.11.0"
 openssl-sys = "0.9.106"
 openssl = { version = "0.10.71", features = ["vendored"] }
+base64 = "0.22.1"
 
 [dev-dependencies]
 tempfile = "3.10.1"

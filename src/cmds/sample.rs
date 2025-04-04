@@ -28,7 +28,7 @@ pub fn show_sample(path: String, dual: bool) {
     let target_ilo = TargetIlo {
         host: String::from("ILO_HOST_NAME_OR_IP_ADDRESS"),
         user: String::from("USERNAME"),
-        password: String::from("PASSWORD"),
+        password_base64: String::from("PASSWORD_BASE64"),
         target_fans: target_fans.clone(),
         temperature_fan_config: fan_config.clone(),
     };
@@ -41,7 +41,7 @@ pub fn show_sample(path: String, dual: bool) {
         let target_ilo2 = TargetIlo {
             host: String::from("ILO_HOST2_NAME_OR_IP_ADDRESS"),
             user: String::from("USERNAME"),
-            password: String::from("PASSWORD"),
+            password_base64: String::from("PASSWORD_BASE64"),
             target_fans,
             temperature_fan_config: fan_config,
         };
