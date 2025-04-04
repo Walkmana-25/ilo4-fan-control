@@ -1,0 +1,43 @@
+name: Rust Testing
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: ["check"]
+    steps:
+      - name: Preparing test
+        run: "sudo apt-get update && sudo apt-get install ssh adduser sed python3 -y && sudo sed -i 's/^Port 2222$/Port 22/' /etc/ssh/sshd_config && sudo service ssh start && sudo service ssh reload && sudo useradd -m test && printf \'password\\npassword\\n\' | sudo passwd test"
+      - uses: actions/checkout@v3
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Test Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+
+  check:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Install Rust fmt
+        run: rustup component add rustfmt
+      - name: Install Rust clippy
+        run: rustup component add clippy
+      - name: Run rustfmt
+        run: cargo fmt --all -- --check
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings

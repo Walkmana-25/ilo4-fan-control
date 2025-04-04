@@ -1,0 +1,13 @@
+[Unit]
+Description=HPE iLO4 Fan Control Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fctrl daemon -p /etc/ilo4-fan-control/config.toml
+Restart=on-failure
+RestartSec=30
+User=root
+
+[Install]
+WantedBy=multi-user.target
