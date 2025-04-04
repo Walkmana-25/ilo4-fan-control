@@ -35,6 +35,7 @@ jobs:
               runner: windows-latest
               cross: false
             - target: x86_64-apple-darwin
+              name: "x86_64-apple-darwin"
               extension: ""
               runner: macos-latest
               cross: false
@@ -44,10 +45,12 @@ jobs:
               runner: ubuntu-latest
               cross: true
             - target: aarch64-pc-windows-msvc
+              name: "aarch64-pc-windows-msvc"
               extension: ".exe"
               runner: windows-latest
               cross: false
             - target: aarch64-apple-darwin
+              name: "aarch64-apple-darwin"
               extension: ""
               runner: macos-latest
               cross: false
