@@ -113,7 +113,6 @@ mod tests {
     fn test_generate_fan_commands_num_fans() {
         // NumFans形式でのテスト
         let target = create_test_target(TargetFans::NumFans(3));
-        let password: String = STANDARD.encode("password123");
 
         // 低温域でのテスト (0-30℃)
         let low_temp_commands = generate_fan_commands(&target, 25);
