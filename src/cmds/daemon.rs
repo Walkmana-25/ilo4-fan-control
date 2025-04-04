@@ -72,7 +72,7 @@ async fn runner(config: TargetIlo) -> Result<()> {
     let password_base64 = config.password_base64.clone();
     let host = config.host.clone();
     let user = config.user.clone();
-    
+
     let password = STANDARD.decode(password_base64)?;
     let password = String::from_utf8(password)?;
 

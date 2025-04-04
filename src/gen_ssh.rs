@@ -214,7 +214,6 @@ mod tests {
 
         let password: String = STANDARD.encode("password123");
         for (percentage, expected) in test_cases.iter() {
-
             let target = TargetIlo {
                 host: String::from("example.com"),
                 user: String::from("admin"),

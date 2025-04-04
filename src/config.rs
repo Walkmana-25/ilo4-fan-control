@@ -127,9 +127,9 @@ impl IloConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
     use std::io::Write;
     use tempfile::NamedTempFile;
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
 
     fn create_valid_config() -> IloConfig {
         let password_base64 = STANDARD.encode("password123");
