@@ -123,9 +123,13 @@ async fn get_ilo_data(url: &str, user: &str, password: &str) -> Result<String> {
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
-    let resp = client.get(url)
+    let resp = client
+        .get(url)
         .basic_auth(user, Some(password))
-        .send().await?.text().await?;
+        .send()
+        .await?
+        .text()
+        .await?;
     Ok(resp)
 }
 
