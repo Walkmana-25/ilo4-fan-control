@@ -1,4 +1,6 @@
 use anyhow::Result;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine as _;
 use log::{debug, info};
 use std::fmt::{self};
 
@@ -83,10 +85,26 @@ impl fmt::Display for TempData {
 ///
 /// This function makes an HTTPS request to the ILO's Redfish API endpoint
 /// to get current temperature and fan status information.
-pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<TempData> {
-    let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
+pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> Result<TempData> {
+    debug!("Getting temperature data from ILO at {}@{}", user, address);
+    debug!("Password is set: {}", !password_base64.is_empty());
+
+    let password = BASE64_STANDARD
+        .decode(password_base64.as_bytes())
+        .unwrap_or_else(|_| password_base64.as_bytes().to_vec());
+
+    let password = String::from_utf8(password)?;
+
+    // remove \n and \r
+    let password = password
+        .chars()
+        .filter(|&c| c != '\n' && c != '\r')
+        .collect::<String>();
+
+    let url = format!("https://{address}/redfish/v1/Chassis/1/Thermal/");
     info!("Fetching temperature data from ILO at {}", url);
-    let json = get_ilo_data(&url, user, password).await?;
+    let json = get_ilo_data(&url, user, &password).await?;
+    debug!("JSON response: {}", json);
     let temp_data = json_parser(&json)?;
     Ok(temp_data)
 }
@@ -1313,7 +1331,7 @@ mod test {
         sleep(Duration::from_secs(2));
 
         // Run the actual test
-        let result = get_ilo_data("https://localhost:8080", "user", "pass").await;
+        let result = get_ilo_data("https://localhost:8080", "user", "password").await;
         println!("Result: {:#?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");

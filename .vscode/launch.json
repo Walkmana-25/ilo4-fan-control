@@ -1,0 +1,65 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'ilo4_fan_control'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=ilo4-fan-control"
+                ],
+                "filter": {
+                    "name": "ilo4_fan_control",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'fctrl'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=fctrl",
+                    "--package=ilo4-fan-control"
+                ],
+                "filter": {
+                    "name": "fctrl",
+                    "kind": "bin"
+                }
+            },
+            "args": ["--log-level", "debug", "daemon", "-p", "./test.toml"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'fctrl'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=fctrl",
+                    "--package=ilo4-fan-control"
+                ],
+                "filter": {
+                    "name": "fctrl",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
