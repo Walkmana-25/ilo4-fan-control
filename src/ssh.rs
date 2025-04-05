@@ -27,12 +27,20 @@ impl SshClient {
     /// # Returns
     /// * `SshClient` - A new instance of the SSH client
     pub fn new(host: String, user: String, password_base64: String) -> Self {
+        
         let password = BASE64_STANDARD
             .decode(password_base64.as_bytes())
-            .unwrap_or_else(|_| password_base64.as_bytes().to_vec())
-            .into_iter()
-            .map(|b| b as char)
+            .unwrap_or_else(|_| password_base64.as_bytes().to_vec());
+
+        let password = String::from_utf8(password)
+            .unwrap_or_else(|_| String::from_utf8_lossy(password_base64.as_bytes()).to_string());
+        
+        // remove \n and \r
+        let password = password
+            .chars()
+            .filter(|&c| c != '\n' && c != '\r')
             .collect::<String>();
+        
 
         SshClient {
 
