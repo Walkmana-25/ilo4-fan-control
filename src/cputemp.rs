@@ -1327,7 +1327,7 @@ mod test {
         sleep(Duration::from_secs(2));
 
         // Run the actual test
-        let result = get_ilo_data("https://localhost:8080", "user", "pass").await;
+        let result = get_ilo_data("https://user:password@localhost:8080").await;
         println!("Result: {:#?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "Hello-World-Test");
