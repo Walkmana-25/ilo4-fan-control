@@ -73,7 +73,6 @@ async fn runner(config: TargetIlo) -> Result<()> {
     let host = config.host.clone();
     let user = config.user.clone();
 
-
     info!("Fan controller for host: {}", &host);
     debug!("User: {}", &user);
 

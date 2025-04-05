@@ -1,8 +1,8 @@
 use anyhow::Result;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine as _;
 use log::{debug, info};
 use std::fmt::{self};
-use base64::Engine as _;
-use base64::prelude::BASE64_STANDARD;
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {
@@ -88,13 +88,13 @@ impl fmt::Display for TempData {
 pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> Result<TempData> {
     debug!("Getting temperature data from ILO at {}@{}", user, address);
     debug!("Password is set: {}", !password_base64.is_empty());
-    
+
     let password = BASE64_STANDARD
         .decode(password_base64.as_bytes())
         .unwrap_or_else(|_| password_base64.as_bytes().to_vec());
 
     let password = String::from_utf8(password)?;
-    
+
     // remove \n and \r
     let password = password
         .chars()
@@ -123,12 +123,7 @@ async fn get_ilo_data(url: &str) -> Result<String> {
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
-    let resp = client
-        .get(url)
-        .send()
-        .await?
-        .text()
-        .await?;
+    let resp = client.get(url).send().await?.text().await?;
     Ok(resp)
 }
 
