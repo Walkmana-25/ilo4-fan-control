@@ -6,7 +6,6 @@ use log::{debug, error, info};
 use crate::config::TargetIlo;
 use crate::cputemp;
 use crate::ssh;
-use base64::{engine::general_purpose::STANDARD, Engine as _};
 
 pub fn start_daemon(config_path: String) -> Result<()> {
     debug!("Starting daemon with config path: {}", config_path);
