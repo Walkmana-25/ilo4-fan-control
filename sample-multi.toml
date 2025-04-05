@@ -62,7 +62,7 @@ max_fan_speed = 100
 host = "ILO_HOST2_NAME_OR_IP_ADDRESS"
 # iLO authentication username
 user = "USERNAME"
-# iLO authentication password
+# Base64 encoded iLO authentication password
 password_base64 = "PASSWORD"
 
 # Fan settings
