@@ -12,8 +12,8 @@ run_period_seconds = 60
 host = "ILO_HOST_NAME_OR_IP_ADDRESS"
 # iLO authentication username
 user = "USERNAME"
-# iLO authentication password
-password = "PASSWORD"
+# base64 encoded iLO authentication password
+password_base64 = "PASSWORD"
 
 # Fan settings
 # NumFans specifies the number of fans in the server (indexed from 0)
