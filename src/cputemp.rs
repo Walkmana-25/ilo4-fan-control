@@ -1,6 +1,8 @@
 use anyhow::Result;
 use log::{debug, info};
 use std::fmt::{self};
+use base64::Engine as _;
+use base64::prelude::BASE64_STANDARD;
 
 #[derive(Debug, PartialEq)]
 pub struct CpuTemp {
@@ -83,12 +85,22 @@ impl fmt::Display for TempData {
 ///
 /// This function makes an HTTPS request to the ILO's Redfish API endpoint
 /// to get current temperature and fan status information.
-pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<TempData> {
+pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> Result<TempData> {
     debug!("Getting temperature data from ILO at {}@{}", user, address);
-    debug!("Password is set: {}", !password.is_empty());
+    debug!("Password is set: {}", !password_base64.is_empty());
+    
+    let password = BASE64_STANDARD
+        .decode(password_base64.as_bytes())
+        .unwrap_or_else(|_| password_base64.as_bytes().to_vec())
+        .into_iter()
+        .map(|b| b as char)
+        .collect::<String>();
+    
+    
     let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
     info!("Fetching temperature data from ILO at {}", url);
-    let json = get_ilo_data(&url, user, password).await?;
+    let json = get_ilo_data(&url, user, password.as_str()).await?;
+    debug!("JSON response: {}", json);
     let temp_data = json_parser(&json)?;
     Ok(temp_data)
 }

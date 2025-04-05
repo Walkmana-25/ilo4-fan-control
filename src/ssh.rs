@@ -1,6 +1,8 @@
 use anyhow::{Context, Result};
+use base64::Engine as _;
 use std::io::Read;
 use std::net::TcpStream;
+use base64::prelude::BASE64_STANDARD;
 
 /// SSH client for ILO connection
 ///
@@ -23,8 +25,15 @@ impl SshClient {
     ///
     /// # Returns
     /// * `SshClient` - A new instance of the SSH client
-    pub fn new(host: String, user: String, password: String) -> Self {
+    pub fn new(host: String, user: String, password_base64: String) -> Self {
+        let password = BASE64_STANDARD
+            .decode(password_base64.as_bytes())
+            .unwrap_or_else(|_| password_base64.into_bytes())
+            .into_iter()
+            .map(|b| b as char)
+            .collect::<String>();
         SshClient {
+
             host,
             user,
             password,
