@@ -92,8 +92,7 @@ impl SshClient {
         let user = binding_user.as_str();
         let password = binding.as_str();
 
-        debug!("User: {}, Password: {}", user, password);
-
+        debug!("Attempting to authenticate user: {}", user);
         session.userauth_password(user, password)?;
 
         Ok(())
