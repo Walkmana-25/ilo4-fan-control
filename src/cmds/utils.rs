@@ -36,8 +36,7 @@ pub fn get_connection_info(
             .with_prompt("Enter ilo password")
             .interact()
             .unwrap();
-        let decoded = STANDARD.decode(input).unwrap();
-        String::from_utf8(decoded).unwrap()
+        STANDARD.encode(input.as_bytes())
     });
     debug!("Host: {}", host);
     debug!("User: {}", user);
