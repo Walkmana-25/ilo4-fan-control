@@ -95,11 +95,12 @@ pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> 
         .into_iter()
         .map(|b| b as char)
         .collect::<String>();
+    debug!("{} password decoded", password);
     
     
-    let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
+    let url = format!("https://{user}:{password}@{address}/redfish/v1/Chassis/1/Thermal/");
     info!("Fetching temperature data from ILO at {}", url);
-    let json = get_ilo_data(&url, user, password.as_str()).await?;
+    let json = get_ilo_data(&url).await?;
     debug!("JSON response: {}", json);
     let temp_data = json_parser(&json)?;
     Ok(temp_data)
@@ -115,13 +116,12 @@ pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> 
 ///
 /// This function creates an HTTPS client that accepts self-signed certificates
 /// and makes a GET request to the specified URL.
-async fn get_ilo_data(url: &str, user: &str, password: &str) -> Result<String> {
+async fn get_ilo_data(url: &str) -> Result<String> {
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
     let resp = client
         .get(url)
-        .basic_auth(user, Some(password))
         .send()
         .await?
         .text()
