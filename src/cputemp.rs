@@ -91,13 +91,16 @@ pub async fn get_temp_data(address: &str, user: &str, password_base64: &str) -> 
     
     let password = BASE64_STANDARD
         .decode(password_base64.as_bytes())
-        .unwrap_or_else(|_| password_base64.as_bytes().to_vec())
-        .into_iter()
-        .map(|b| b as char)
+        .unwrap_or_else(|_| password_base64.as_bytes().to_vec());
+
+    let password = String::from_utf8(password)?;
+    
+    // remove \n and \r
+    let password = password
+        .chars()
+        .filter(|&c| c != '\n' && c != '\r')
         .collect::<String>();
-    debug!("{} password decoded", password);
-    
-    
+
     let url = format!("https://{user}:{password}@{address}/redfish/v1/Chassis/1/Thermal/");
     info!("Fetching temperature data from ILO at {}", url);
     let json = get_ilo_data(&url).await?;

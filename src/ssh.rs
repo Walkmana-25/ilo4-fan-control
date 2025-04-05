@@ -3,6 +3,7 @@ use base64::Engine as _;
 use std::io::Read;
 use std::net::TcpStream;
 use base64::prelude::BASE64_STANDARD;
+use log::debug;
 
 /// SSH client for ILO connection
 ///
@@ -28,10 +29,11 @@ impl SshClient {
     pub fn new(host: String, user: String, password_base64: String) -> Self {
         let password = BASE64_STANDARD
             .decode(password_base64.as_bytes())
-            .unwrap_or_else(|_| password_base64.into_bytes())
+            .unwrap_or_else(|_| password_base64.as_bytes().to_vec())
             .into_iter()
             .map(|b| b as char)
             .collect::<String>();
+
         SshClient {
 
             host,
@@ -79,8 +81,15 @@ impl SshClient {
 
         session.set_tcp_stream(tcp);
         session.handshake()?;
+        
+        let binding_user = self.user.clone();
+        let binding = self.password.clone();
+        let user = binding_user.as_str();
+        let password = binding.as_str();
+        
+        debug!("User: {}, Password: {}", user, password);
 
-        session.userauth_password(&self.user, &self.password)?;
+        session.userauth_password(user, password)?;
 
         Ok(())
     }
@@ -110,10 +119,11 @@ impl SshClient {
 
 #[cfg(test)]
 mod test {
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
     #[test]
     fn test_ssh_connect() {
         let ssh_user = "test".to_string();
-        let ssh_password = "password".to_string();
+        let ssh_password = STANDARD.encode("password".as_bytes());
 
         let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
         assert!(client.connect().is_ok());
@@ -122,7 +132,7 @@ mod test {
     #[test]
     fn test_ssh_exec_cmd() {
         let ssh_user = "test".to_string();
-        let ssh_password = "password".to_string();
+        let ssh_password = STANDARD.encode("password".as_bytes());
 
         let mut client = super::SshClient::new("localhost".to_string(), ssh_user, ssh_password);
         assert!(client.connect().is_ok());
