@@ -327,7 +327,7 @@ run_period_seconds = 60
 [[targets]]
 host = "192.168.1.100"
 user = "admin"
-password = "password123"
+password_base64 = "BASE64_ENCODED_PASSWORD"
 
 [targets.target_fans]
 NumFans = 7
@@ -342,7 +342,7 @@ max_fan_speed = 20
 [[targets]]
 host = "192.168.1.101"
 user = "admin"
-password = "password456"
+password_base64 = "password456"
 
 [targets.target_fans]
 NumFans = 6  # Different server might have different number of fans
