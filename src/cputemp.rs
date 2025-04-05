@@ -84,6 +84,8 @@ impl fmt::Display for TempData {
 /// This function makes an HTTPS request to the ILO's Redfish API endpoint
 /// to get current temperature and fan status information.
 pub async fn get_temp_data(address: &str, user: &str, password: &str) -> Result<TempData> {
+    debug!("Getting temperature data from ILO at {}@{}", user, address);
+    debug!("Password is set: {}", !password.is_empty());
     let url = format!("https://{}/redfish/v1/Chassis/1/Thermal", address);
     info!("Fetching temperature data from ILO at {}", url);
     let json = get_ilo_data(&url, user, password).await?;
