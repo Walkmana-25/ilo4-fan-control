@@ -53,7 +53,7 @@ pub fn show_sample(path: String, dual: bool) {
     // Save the sample configuration to a file
     match ilo_config.save_to_toml_file(&path) {
         Ok(_) => {
-            info!("Sample configuration saved to {}", &path);
+            info!("Sample configuration saved to {}", path);
         }
         Err(e) => {
             error!("Failed to save sample configuration: {}", e);

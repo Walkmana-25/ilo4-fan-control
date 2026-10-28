@@ -72,17 +72,17 @@ async fn runner(config: TargetIlo) -> Result<()> {
     let host = config.host.clone();
     let user = config.user.clone();
 
-    info!("Fan controller for host: {}", &host);
-    debug!("User: {}", &user);
+    info!("Fan controller for host: {}", host);
+    debug!("User: {}", user);
 
     // Get the current temperature
     let temprature = cputemp::get_temp_data(&host, &user, &password).await?;
 
     info!(
         "Current CPU 0 Temp of {}: {:?}°C",
-        &host, &temprature.cpu_temps[0].current
+        host, temprature.cpu_temps[0].current
     );
-    debug!("Detail data of {}:\n {}", &host, &temprature);
+    debug!("Detail data of {}:\n {}", host, temprature);
 
     let mut max_cpu_temp = 0;
 
@@ -94,26 +94,26 @@ async fn runner(config: TargetIlo) -> Result<()> {
 
     // Generate fan commands based on the current temperature
     let commands = crate::gen_ssh::generate_fan_commands(&config, max_cpu_temp);
-    debug!("Fan control commands for {}: {:?}", &host, &commands);
+    debug!("Fan control commands for {}: {:?}", host, commands);
 
     // Execute the fan control commands
     let mut client = ssh::SshClient::new(host.clone(), user, password);
     match client.connect() {
         Ok(_) => {
-            debug!("Connected to {}", &host);
+            debug!("Connected to {}", host);
         }
         Err(e) => {
-            error!("Failed to connect to {}: {}", &host, e);
+            error!("Failed to connect to {}: {}", host, e);
             return Err(e);
         }
     }
 
     match client.exec(commands) {
         Ok(output) => {
-            debug!("Fan control output for {}: {:?}", &host, output);
+            debug!("Fan control output for {}: {:?}", host, output);
         }
         Err(e) => {
-            error!("Failed to execute commands on {}: {}", &host, e);
+            error!("Failed to execute commands on {}: {}", host, e);
             return Err(e);
         }
     }
